@@ -23,6 +23,13 @@ var flowspec6_enable = getSystemProperty("ddos_protect.enable.flowspec6") === 'y
 
 var flowspec_dscp = getSystemProperty("ddos_protect.flowspec.dscp") || 'le';
 var flowspec_rate = getSystemProperty("ddos_protect.flowspec.rate") || 12500; // 100Kbps
+var flowspec_redirect_method = getSystemProperty("ddos_protect.flowspec.redirect.method") || 'as';
+var flowspec_redirect_as = getSystemProperty("ddos_protect.flowspec.redirect.as") || '65000:666';
+var flowspec_redirect_as4 = getSystemProperty("ddos_protect.flowspec.redirect.as4") || '65000:666';
+var flowspec_redirect_ip = getSystemProperty("ddos_protect.flowspec.redirect.ip") || '192.0.2.1:666';
+var flowspec_redirect_nexthop = getSystemProperty("ddos_protect.flowspec.redirect.nexthop") || '192.0.2.1';
+var flowspec_redirect_nexthop6 = getSystemProperty("ddos_protect.flowspec.redirect.nexthop6") || '100::1';
+var flowspec_community = getSystemProperty("ddos_protect.flowspec.community") || '128:6:0'; // drop
 
 var effectiveSamplingRateFlag = getSystemProperty("ddos_protect.esr") === 'yes';
 var flow_t = getSystemProperty("ddos_protect.flow_seconds") || '2';
@@ -189,6 +196,35 @@ function bgpAddControl(ctl) {
       ctl.flowspec.then={'traffic-rate':flowspec_rate};
       bgpFlowSpec(ctl);
       break;
+    case 'redirect':
+      ctl.flowspec.then={};
+      switch(flowspec_redirect_method) {
+        case 'as':
+          ctl.flowspec.then['redirect-as'] = flowspec_redirect_as;
+          break;
+        case 'as4':
+          ctl.flowspec.then['redirect-as4'] = flowspec_redirect_as4;
+          break;
+        case 'ip':
+          ctl.flowspec.then['redirect-ip'] = flowspec_redirect_ip;
+          break;
+        case 'nexthop':
+          switch(ctl.ipversion) {
+            case '4':
+              ctl.flowspec.then['redirect-nexthop'] = flowspec_redirect_nexthop;
+              break;
+            case '6': 
+              ctl.flowspec.then['redirect-nexthop'] = flowspec_redirect_nexthop6;
+              break;
+          }
+          break;
+      }
+      bgpFlowSpec(ctl);
+      break;
+    case 'community':
+      ctl.flowspec.then={'communities':flowspec_community};
+      bgpFlowSpec(ctl);
+      break;
     case 'ignore':
       break;
   }
@@ -204,6 +240,8 @@ function bgpRemoveControl(ctl) {
     case 'filter':
     case 'mark':
     case 'limit':
+    case 'redirect':
+    case 'community':
       bgpRemoveFlow(router_ip,ctl.flowspec);
       break;
     case 'ignore':
@@ -635,7 +673,7 @@ function updateSettings(vals) {
         if(val) {
           switch(param) {
             case 'action':
-              if('ignore' === val || 'drop' === val || 'filter' === val || 'mark' === val || 'limit' === val) {
+              if('ignore' === val || 'drop' === val || 'filter' === val || 'mark' === val || 'limit' === val || 'redirect' === val || 'community' === val) {
                 newEntry[param] = val;
               } else {
                 return false;

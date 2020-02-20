@@ -233,7 +233,7 @@ $(function() {
   function updateSettings(settings) {
     $('#settingstable tbody tr').each(function(idx) {
       var row = $(this);
-      row.removeClass('table-info table-danger table-warning table-primary table-secondary table-success');
+      row.removeClass('table-info table-active table-danger table-warning table-primary table-secondary table-success table-default');
       var cells = row.children();
       var attack = $(cells[0]).html();
       var vals = settings[attack];
@@ -254,11 +254,17 @@ $(function() {
           case 'limit':
             row.addClass('table-secondary');
             break;
+          case 'redirect':
+            row.addClass('table-info');
+            break;
+          case 'community':
+            row.addClass('table-active');
+            break;
           case 'ignore':
             row.addClass('table-success');
             break;
           default:
-            row.addClass('table-info');
+            row.addClass('table-default');
         }
       }
     });

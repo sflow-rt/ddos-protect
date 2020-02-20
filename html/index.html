@@ -246,7 +246,7 @@
               </tbody>
             </table>
             <p>Click on rows in the table to change attack mitigation settings: threshold (in packets per second) to trigger control action,
-            timeout (in Minutes) before removing action, and action type (ignore, drop, filter, mark, and limit).</p>
+            timeout (in Minutes) before removing action, and action type (ignore, drop, filter, mark, limit, redirect, community).</p>
             <div class="modal fade" id="setting-dialog" tabindex="-1" role="dialog">
               <form>
                 <div class="modal-dialog" role="document">
@@ -267,6 +267,8 @@
                            <option>filter</option>
                            <option>mark</option>
                            <option>limit</option>
+                           <option>redirect</option>
+                           <option>community</option>
                          </select>
                        </div>
                      </div>
@@ -344,14 +346,14 @@
          using the <a href="https://sflow-rt.com/">sFlow-RT</a> real-time analytics engine. The software receives
          a continuous stream of telemetry from standard <a href="https://sflow-rt.com/agents.php">sFlow agents</a>
          embedded in network devices, detects DDoS attacks, and pushes BGP remote triggered blackhole (RTBH) or
-         FlowSpec messages to block the attack upstream.</p>
+         Flowspec messages to block the attack upstream.</p>
         <h3>Getting Started</h3>
         <p>The following steps are required:</p>
         <ol>
           <li>Configure sFlow</li>
           <li>Configure BGP</li>
-          <li>Set mitigation policy</li>
           <li>Group address space</li>
+          <li>Set mitigation policy</li>
         </ol>
         <p>Once configuration is complete, the <em>Charts</em> tab will display candidate DDoS traffic.
         If the charts show zero traffic, verify that sFlow data is being received and that traffic groups
@@ -369,41 +371,6 @@
         will be configured on router.  Configure site router (or route reflector) to establish a BGP connection
         to controller on TCP port 1179. Use the <em>BGP</em> chart under the <em>Charts</em> tab to verify
         that the connection has been establed.</p> 
-
-        <h4>Set Mitigation Policy</h4>
-        <p>The following volumetric DDoS attack types can be detected:</p>
-        <table class="table table-bordered table-sm table-responsive-sm table-striped">
-          <thead class="thead-light">
-            <tr><th>Attack</th><th>Description</th></tr>
-          </thead>
-          <tbody>
-            <tr><th>ip_flood</th><td>IP packets by target address and protocol</tr>
-            <tr><th>ip_fragmentation</th><td>IP fragments by target address and protocol</tr>
-            <tr><th>udp_flood</th><td>UDP packets by target address and destination port</em></tr> 
-            <tr><th>udp_amplification</th><td>UDP packets by target address and source port</td></tr>
-            <tr><th>tcp_flood</th><td>TCP packets by target address and destination port</td></tr>
-            <tr><th>icmp_flood</th><td>ICMP packets by target address and type</td></tr> 
-          <tbody>
-        </table>
-        <p>For each attack type, select a mitiation action:</p>
-        <table class="table table-bordered table-sm table-responsive-md table-striped">
-          <thead class="thead-light">
-            <tr><th>Action</th><th>Description</th></tr>
-          </thead>
-          <tbody>
-            <tr><th>ignore</th><td>Ignore, don't create control</tr>
-            <tr><th>drop</th><td>Remote triggered black hole (RTBH) dropping all traffic to targetted address</tr>
-            <tr><th>filter</th><td>FlowSpec rule dropping traffic matching protocol, port and target address</tr>                  
-            <tr><th>mark</th><td>FlowSpec rule setting DSCP for traffic matching protocol, port and target address</td></tr>
-            <tr><th>limit</th><td>FlowSpec rule rate limitting traffic matching protocol, port and target address</td></tr>
-          <tbody>
-        </table>
-        <p>For each attack type, set a threshold (in Packets per Second) that will trigger the specified action. Actions
-        are automatically removed after the specified timeout (in Minutes), unless the attack traffic is still above the
-        threshold level.</p>
-        <p>Set the <em>Controller Mode</em> to <em>Manual</em> if you want to confirm control actions before they
-        installed. Click on a row in the <em>Controls</em> table to manually <em>Remove</em> or <em>Install</em> the
-        control.</p>
 
         <h4>Group Address Space</h4>
         <table class="table table-bordered table-sm">
@@ -443,6 +410,43 @@
         <p><strong>Note</strong> At least one candidate group must be defined before traffic will be shown under the
         <em>Charts</em> tab.</p>
 
+        <h4>Set Mitigation Policy</h4>
+        <p>The following volumetric DDoS attack types can be detected:</p>
+        <table class="table table-bordered table-sm table-responsive-sm table-striped">
+          <thead class="thead-light">
+            <tr><th>Attack</th><th>Description</th></tr>
+          </thead>
+          <tbody>
+            <tr><th>ip_flood</th><td>IP packets by target address and protocol</tr>
+            <tr><th>ip_fragmentation</th><td>IP fragments by target address and protocol</tr>
+            <tr><th>udp_flood</th><td>UDP packets by target address and destination port</em></tr>
+            <tr><th>udp_amplification</th><td>UDP packets by target address and source port</td></tr>
+            <tr><th>tcp_flood</th><td>TCP packets by target address and destination port</td></tr>
+            <tr><th>icmp_flood</th><td>ICMP packets by target address and type</td></tr>
+          <tbody>
+        </table>
+        <p>For each attack type, select a mitiation action:</p>
+        <table class="table table-bordered table-sm table-responsive-md table-striped">
+          <thead class="thead-light">
+            <tr><th>Action</th><th>Description</th></tr>
+          </thead>
+          <tbody>
+            <tr><th>ignore</th><td>Ignore, don't create control</tr>
+            <tr><th>drop</th><td>Remote triggered black hole (RTBH) dropping all traffic to targetted address</tr>
+            <tr><th>filter</th><td>Flowspec rule dropping traffic matching protocol, port and target address</tr>
+            <tr><th>mark</th><td>Flowspec rule setting DSCP for traffic matching protocol, port and target address</td></tr>
+            <tr><th>limit</th><td>Flowspec rule rate limitting traffic matching protocol, port and target address</td></tr>
+            <tr><th>redirect</th><td>Flowspec rule redirecting traffic matching protocol, port and target address</td></tr>
+            <tr><th>community</th><td>Flowspec rule setting community for traffic matching protocol, port and target address</td></tr>
+          <tbody>
+        </table>
+        <p>For each attack type, set a threshold (in Packets per Second) that will trigger the specified action. Actions
+        are automatically removed after the specified timeout (in Minutes), unless the attack traffic is still above the
+        threshold level.</p>
+        <p>Set the <em>Controller Mode</em> to <em>Manual</em> if you want to confirm control actions before they
+        installed. Click on a row in the <em>Controls</em> table to manually <em>Remove</em> or <em>Install</em> the
+        control.</p>
+
         <h3>Startup Settings</h3>
         <p>See <a href="https://sflow-rt.com/reference.php#properties">System Properties</a> for information on configuring startup settings.</p>
         <table class="table table-striped table-bordered table-sm table-responsive-xl">
@@ -458,12 +462,19 @@
             <tr><td>ddos_protect.nexthop6</td><td>100::1</td><td>BGP IPv6 next hop used ot identify blackhole routes</td></tr>
             <tr><td>ddos_protect.localpref</td><td>100</td><td>	BGP local preference used to identify blackhole routes</td></tr>
             <tr><td>ddos_protect.enable.ipv6</td><td>no</td><td>BGP enable IPv6 addresses</td></tr>
-            <tr><td>ddos_protect.enable.flowspec</td><td>no</td><td>BGP enable FlowSpec IPv4 rules</td></tr>
-            <tr><td>ddos_protect.enable.flowspec6</td><td>no</td><td>BGP enable FlowSpec IPv6 rules</td></tr>
-            <tr><td>ddos_protect.flowspec.dscp</td><td>le</td><td>BPG FlowSpec DSCP value for marking traffic</td></tr>
-            <tr><td>ddos_protect.flowspec.rate</td><td>12500</td><td>BGP FlowSpec rate (in Bytes per Second) for rate limited traffic</td></tr>
+            <tr><td>ddos_protect.enable.flowspec</td><td>no</td><td>BGP enable Flowspec IPv4 rules</td></tr>
+            <tr><td>ddos_protect.enable.flowspec6</td><td>no</td><td>BGP enable Flowspec IPv6 rules</td></tr>
+            <tr><td>ddos_protect.flowspec.dscp</td><td>le</td><td>BPG Flowspec DSCP value for marking traffic</td></tr>
+            <tr><td>ddos_protect.flowspec.rate</td><td>12500</td><td>BGP Flowspec rate (in Bytes per Second) for rate limited traffic</td></tr>
+            <tr><td>ddos_protect.flowspec.redirect.method</td><td>as</td><td>BGP Flowspec redirect method: <em>as</em>, <em>as4</em>, <em>ip</em>, <em>nexthop</em></td></tr>
+            <tr><td>ddos_protect.flowspec.redirect.as</td><td>65000:666</td><td>BGP Flowspec redirect VRF 2-octet AS, 4-octet value</td></tr>
+            <tr><td>ddos_protect.flowspec.redirect.as4</td><td>65000:666</td><td>BGP Flowspec redirect VRF 4-octet AS, 2-octet value</td></tr>
+            <tr><td>ddos_protect.flowspec.redirect.ip</td><td>192.0.2.1:666</td><td>BGP Flowspec redirect VRF IPv4 address, 2-octet value</td></tr>
+            <tr><td>ddos_protect.flowspec.redirect.nexthop</td><td>192.0.2.1</td><td>BGP Flowspec redirect next-hop for IPv4 flows</td></tr>
+            <tr><td>ddos_protect.flowspec.redirect.nexthop6</td><td>100::1</td><td>BGP Flowspec redirect next-hop for IPv6 flows</td></tr>
+            <tr><td>ddos_protect.flowspec.community</td><td>128:6:0</td><td>BGP Flowspec community</td></tr>
             <tr><td>ddos_protect.maxroutes</td><td>1000</td><td>Maximum number of blackhole routes allowed</td></tr>
-            <tr><td>ddos_protect.maxflows</td><td>100</td><td>Maximum number of FlowSpec rules allowed</td></tr>
+            <tr><td>ddos_protect.maxflows</td><td>100</td><td>Maximum number of Flowspec rules allowed</td></tr>
             <tr><td>ddos_protect.externalgroup</td><td>external</td><td>Address group for external traffic</td></tr>
             <tr><td>ddos_protect.excludedgroups</td><td>external,private,multicast,exclude</td><td>Address groups to exclude as blackhole candidates</td></tr>
             <tr><td>ddos_protect.group.&lt;name&gt;</td><td></td><td>Set default for address group <em>name</em> to comma separated list of CIDRs</td></tr>
