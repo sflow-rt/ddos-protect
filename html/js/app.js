@@ -6,6 +6,8 @@ $(function() {
   var modeURL = '../scripts/ddos.js/mode/json';
   var groupsURL = '../scripts/ddos.js/groups/json';
 
+  var enableFlowBrowserURL = '../../../app/browse-flows/status';
+
   var db = {};
   var showThreshold = true;
   var lastControlsID = 0;
@@ -26,6 +28,32 @@ $(function() {
 
   $('a[href="#"]').on('click', function(e) {
     e.preventDefault();
+  });
+
+  var browseFlowsPage = '../../browse-flows/html/index.html';
+  function openBrowseFlowsLink(id) {
+    var trend = db.trend.trends['top-5-'+id];
+    var latest = trend[trend.length - 1];
+    var ipversion = '';
+    var max = 0;
+    for(var key in latest) {
+      if(latest[key] < max) continue;
+      max = latest[key];
+      ipversion = key.indexOf(':') !== -1 ? '6' : '';
+    }
+    var parts = id.split('-');
+    var specName = 'ddos_protect_' + parts[0] + ipversion + '_' + parts[1];
+    $.get('../../../flow/'+specName+'/json', function(spec) {
+      window.open(browseFlowsPage+'?keys='+encodeURIComponent(spec.keys)+'&value=fps&filter='+encodeURIComponent(spec.filter));
+    }); 
+  }
+
+  $.get(enableFlowBrowserURL, function(status) {
+    if(!'OK' === status) return;
+    $('a.badge:hidden').show().click(function() {
+      var id = $(this).parent().parent().find('.trend').attr('id');
+      openBrowseFlowsLink(id);
+    });
   });
 
   var protocols = {
