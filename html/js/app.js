@@ -44,7 +44,7 @@ $(function() {
     var parts = id.split('-');
     var specName = 'ddos_protect_' + parts[0] + ipversion + '_' + parts[1];
     $.get('../../../flow/'+specName+'/json', function(spec) {
-      window.open(browseFlowsPage+'?keys='+encodeURIComponent(spec.keys)+'&value=fps&filter='+encodeURIComponent(spec.filter));
+      window.location.href=browseFlowsPage+'?keys='+encodeURIComponent(spec.keys)+'&value=fps&filter='+encodeURIComponent(spec.filter);
     }); 
   }
 
