@@ -176,13 +176,13 @@ $(function() {
           default:
             html += '<tr>';
         }
-        html += '<td class="text-truncate">' + entry.target + '</td>';
-        html += '<td class="text-truncate">' + entry.group + '</td>';
-        html += '<td class="text-truncate">' + entry.attack + '</td>';
-        html += '<td class="text-truncate">' + entry.protocol + '</td>';
-        html += '<td class="text-truncate">' + (new Date(entry.time)).toLocaleTimeString('en-US') + '</td>';
-        html += '<td class="text-truncate">' + entry.action + '</td>';
-        html += '<td class="text-truncate">' + entry.status + '</td>'; 
+        html += '<td>' + entry.target + '</td>';
+        html += '<td>' + entry.group + '</td>';
+        html += '<td>' + entry.attack + '</td>';
+        html += '<td>' + entry.protocol + '</td>';
+        html += '<td>' + (new Date(entry.time)).toLocaleTimeString('en-US') + '</td>';
+        html += '<td>' + entry.action + '</td>';
+        html += '<td>' + entry.status + '</td>'; 
         html += '</tr>';
         body.html(html);
         body.find('tr').click(function() {

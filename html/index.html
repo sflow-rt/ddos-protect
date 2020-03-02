@@ -118,21 +118,23 @@
         </div>
       </section>
       <section id="controls" class="container">
-        <table id="controlstable" class="table table-bordered table-sm table-hover" style="table-layout:fixed">
-          <thead class="thead-light">
-            <tr>
-              <th>Target</th>
-              <th>Group</th>
-              <th>Attack</th>
-              <th>Protocol</th>
-              <th>Time</th>
-              <th>Action</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-          </tbody>
-        </table>
+        <div class="table-responsive-xl">
+          <table id="controlstable" class="table table-bordered table-sm table-hover">
+            <thead class="thead-light">
+              <tr>
+                <th>Target</th>
+                <th>Group</th>
+                <th>Attack</th>
+                <th>Protocol</th>
+                <th>Time</th>
+                <th>Action</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+            </tbody>
+          </table>
+        </div>
         <div class="modal fade" id="control-dialog" tabindex="-1" role="dialog">
           <div class="modal-dialog" role="document">
             <div class="modal-content">
@@ -197,54 +199,56 @@
         <div class="card mb-3">
           <div class="card-header">Attack Mitigation</div>
           <div class="card-body">
-            <table id="settingstable" class="table table-bordered table-hover table-sm">
-              <thead class="thead-light">
-                <tr>
-                  <th scope="col">Attack</th>
-                  <th scope="col">Action</th>
-                  <th scope="col">Threshold</th>
-                  <th scope="col">Timeout</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <th scope="row">ip_flood</th>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                </tr>
-                <tr>
-                  <th scope="row">ip_fragmentation</th>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                </tr>
-                <tr>
-                  <th scope="row">udp_flood</th>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                </tr>
-                <tr>
-                  <th scope="row">udp_amplification</th>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                </tr>
-                <tr>
-                  <th scope="row">tcp_flood</th>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                </tr>
-                <tr>
-                  <th scope="row">icmp_flood</th>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                </tr>
-              </tbody>
-            </table>
+            <div class="table-responsive-sm">
+              <table id="settingstable" class="table table-bordered table-hover table-sm">
+                <thead class="thead-light">
+                  <tr>
+                    <th scope="col">Attack</th>
+                    <th scope="col">Action</th>
+                    <th scope="col">Threshold</th>
+                    <th scope="col">Timeout</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <th scope="row">ip_flood</th>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                  </tr>
+                  <tr>
+                    <th scope="row">ip_fragmentation</th>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                  </tr>
+                  <tr>
+                    <th scope="row">udp_flood</th>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                  </tr>
+                  <tr>
+                    <th scope="row">udp_amplification</th>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                  </tr>
+                  <tr>
+                    <th scope="row">tcp_flood</th>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                  </tr>
+                  <tr>
+                    <th scope="row">icmp_flood</th>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
             <p>Click on rows in the table to change attack mitigation settings: threshold (in packets per second) to trigger control action,
             timeout (in Minutes) before removing action, and action type (ignore, drop, filter, mark, limit, redirect, community).</p>
             <div class="modal fade" id="setting-dialog" tabindex="-1" role="dialog">
@@ -412,34 +416,38 @@
 
         <h4>Set Mitigation Policy</h4>
         <p>The following volumetric DDoS attack types can be detected:</p>
-        <table class="table table-bordered table-sm table-responsive-sm table-striped">
-          <thead class="thead-light">
-            <tr><th>Attack</th><th>Description</th></tr>
-          </thead>
-          <tbody>
-            <tr><th>ip_flood</th><td>IP packets by target address and protocol</tr>
-            <tr><th>ip_fragmentation</th><td>IP fragments by target address and protocol</tr>
-            <tr><th>udp_flood</th><td>UDP packets by target address and destination port</em></tr>
-            <tr><th>udp_amplification</th><td>UDP packets by target address and source port</td></tr>
-            <tr><th>tcp_flood</th><td>TCP packets by target address and destination port</td></tr>
-            <tr><th>icmp_flood</th><td>ICMP packets by target address and type</td></tr>
-          <tbody>
-        </table>
+        <div class="table-responsive-sm">
+          <table class="table table-bordered table-sm table-striped">
+            <thead class="thead-light">
+              <tr><th>Attack</th><th>Description</th></tr>
+            </thead>
+            <tbody>
+              <tr><th>ip_flood</th><td>IP packets by target address and protocol</tr>
+              <tr><th>ip_fragmentation</th><td>IP fragments by target address and protocol</tr>
+              <tr><th>udp_flood</th><td>UDP packets by target address and destination port</em></tr>
+              <tr><th>udp_amplification</th><td>UDP packets by target address and source port</td></tr>
+              <tr><th>tcp_flood</th><td>TCP packets by target address and destination port</td></tr>
+              <tr><th>icmp_flood</th><td>ICMP packets by target address and type</td></tr>
+            <tbody>
+          </table>
+        </div>
         <p>For each attack type, select a mitiation action:</p>
-        <table class="table table-bordered table-sm table-responsive-md table-striped">
-          <thead class="thead-light">
-            <tr><th>Action</th><th>Description</th></tr>
-          </thead>
-          <tbody>
-            <tr><th>ignore</th><td>Ignore, don't create control</tr>
-            <tr><th>drop</th><td>Remote triggered black hole (RTBH) dropping all traffic to targetted address</tr>
-            <tr><th>filter</th><td>Flowspec rule dropping traffic matching protocol, port and target address</tr>
-            <tr><th>mark</th><td>Flowspec rule setting DSCP for traffic matching protocol, port and target address</td></tr>
-            <tr><th>limit</th><td>Flowspec rule rate limitting traffic matching protocol, port and target address</td></tr>
-            <tr><th>redirect</th><td>Flowspec rule redirecting traffic matching protocol, port and target address</td></tr>
-            <tr><th>community</th><td>Flowspec rule setting community for traffic matching protocol, port and target address</td></tr>
-          <tbody>
-        </table>
+        <div class="table-responsive-md">
+          <table class="table table-bordered table-sm table-striped">
+            <thead class="thead-light">
+              <tr><th>Action</th><th>Description</th></tr>
+            </thead>
+            <tbody>
+              <tr><th>ignore</th><td>Ignore, don't create control</tr>
+              <tr><th>drop</th><td>Remote triggered black hole (RTBH) dropping all traffic to targetted address</tr>
+              <tr><th>filter</th><td>Flowspec rule dropping traffic matching protocol, port and target address</tr>
+              <tr><th>mark</th><td>Flowspec rule setting DSCP for traffic matching protocol, port and target address</td></tr>
+              <tr><th>limit</th><td>Flowspec rule rate limitting traffic matching protocol, port and target address</td></tr>
+              <tr><th>redirect</th><td>Flowspec rule redirecting traffic matching protocol, port and target address</td></tr>
+              <tr><th>community</th><td>Flowspec rule setting community for traffic matching protocol, port and target address</td></tr>
+            <tbody>
+          </table>
+        </div>
         <p>For each attack type, set a threshold (in Packets per Second) that will trigger the specified action. Actions
         are automatically removed after the specified timeout (in Minutes), unless the attack traffic is still above the
         threshold level.</p>
@@ -449,63 +457,65 @@
 
         <h3>Startup Settings</h3>
         <p>See <a href="https://sflow-rt.com/reference.php#properties">System Properties</a> for information on configuring startup settings.</p>
-        <table class="table table-striped table-bordered table-sm table-responsive-xl">
-          <thead class="thead-light"><tr><th>Property</th><th>Default</th><th>Description</th></tr><thead>
-          <tbody>
-            <tr><td>bgp.start</td><td>no</td><td>Start BGP listener</td></tr>
-            <tr><td>bgp.port</td><td>1179</td><td>TCP port used to listen for BGP connections</td></tr>
-            <tr><td>ddos_protect.router</td><td>127.0.0.1</td><td>IP address of router used to implement null routes</td></tr>
-            <tr><td>ddos_protect.as</td><td>65000</td><td>Local AS number to advertise to router</td></tr>
-            <tr><td>ddos_protect.id</td><td>0.6.6.6</td><td>Local identifier to advertise to router</td></tr>
-            <tr><td>ddos_protect.community</td><td>65535:666</td><td>BGP community used to identify blackhole routes</td></tr>
-            <tr><td>ddos_protect.nexthop</td><td>192.0.2.1</td><td>BGP next hop used to identify blackhole routes</td></tr> 
-            <tr><td>ddos_protect.nexthop6</td><td>100::1</td><td>BGP IPv6 next hop used ot identify blackhole routes</td></tr>
-            <tr><td>ddos_protect.localpref</td><td>100</td><td>	BGP local preference used to identify blackhole routes</td></tr>
-            <tr><td>ddos_protect.enable.ipv6</td><td>no</td><td>BGP enable IPv6 addresses</td></tr>
-            <tr><td>ddos_protect.enable.flowspec</td><td>no</td><td>BGP enable Flowspec IPv4 rules</td></tr>
-            <tr><td>ddos_protect.enable.flowspec6</td><td>no</td><td>BGP enable Flowspec IPv6 rules</td></tr>
-            <tr><td>ddos_protect.flowspec.dscp</td><td>le</td><td>BPG Flowspec DSCP value for marking traffic</td></tr>
-            <tr><td>ddos_protect.flowspec.rate</td><td>12500</td><td>BGP Flowspec rate (in Bytes per Second) for rate limited traffic</td></tr>
-            <tr><td>ddos_protect.flowspec.redirect.method</td><td>as</td><td>BGP Flowspec redirect method: <em>as</em>, <em>as4</em>, <em>ip</em>, <em>nexthop</em></td></tr>
-            <tr><td>ddos_protect.flowspec.redirect.as</td><td>65000:666</td><td>BGP Flowspec redirect VRF 2-octet AS, 4-octet value</td></tr>
-            <tr><td>ddos_protect.flowspec.redirect.as4</td><td>65000:666</td><td>BGP Flowspec redirect VRF 4-octet AS, 2-octet value</td></tr>
-            <tr><td>ddos_protect.flowspec.redirect.ip</td><td>192.0.2.1:666</td><td>BGP Flowspec redirect VRF IPv4 address, 2-octet value</td></tr>
-            <tr><td>ddos_protect.flowspec.redirect.nexthop</td><td>192.0.2.1</td><td>BGP Flowspec redirect next-hop for IPv4 flows</td></tr>
-            <tr><td>ddos_protect.flowspec.redirect.nexthop6</td><td>100::1</td><td>BGP Flowspec redirect next-hop for IPv6 flows</td></tr>
-            <tr><td>ddos_protect.flowspec.community</td><td>128:6:0</td><td>BGP Flowspec community</td></tr>
-            <tr><td>ddos_protect.maxroutes</td><td>1000</td><td>Maximum number of blackhole routes allowed</td></tr>
-            <tr><td>ddos_protect.maxflows</td><td>100</td><td>Maximum number of Flowspec rules allowed</td></tr>
-            <tr><td>ddos_protect.externalgroup</td><td>external</td><td>Address group for external traffic</td></tr>
-            <tr><td>ddos_protect.excludedgroups</td><td>external,private,multicast,exclude</td><td>Address groups to exclude as blackhole candidates</td></tr>
-            <tr><td>ddos_protect.group.&lt;name&gt;</td><td></td><td>Set default for address group <em>name</em> to comma separated list of CIDRs</td></tr>
-            <tr><td>ddos_protect.ip_flood.action</td><td>ignore</td><td>Default action: <em>ignore</em>, <em>drop</em>, <em>filter</em>, <em>mark</em>, or <em>limit</em></td></tr>
-            <tr><td>ddos_protect.ip_flood.threshold</td><td>1000000</td><td>Default threshold (in Packets per Second)</td></tr>
-            <tr><td>ddos_protect.ip_flood.timeout</td><td>180</td><td>Default period to maintain action (in Minutes)</td></tr>
-            <tr><td>ddos_protect.ip_fragmentation.action</td><td>ignore</td><td>Default action: <em>ignore</em>, <em>drop</em>, <em>filter</em>, <em>mark</em>, or <em>limit</em></td></tr>
-            <tr><td>ddos_protect.ip_fragmentation.threshold</td><td>500000</td><td>Default threshold (in Packets per Second)</td></tr>
-            <tr><td>ddos_protect.ip_fragmentation.timeout</td><td>60</td><td>Default period to maintain action (in Minutes)</td></tr>
-            <tr><td>ddos_protect.icmp_flood.action</td><td>ignore</td><td>Default action: <em>ignore</em>, <em>drop</em>, <em>filter</em>, <em>mark</em>, or <em>limit</em></td></tr>
-            <tr><td>ddos_protect.icmp_flood.threshold</td><td>500000</td><td>Default threshold (in Packets per Second)</td></tr>
-            <tr><td>ddos_protect.icmp_flood.timeout</td><td>60</td><td>Default period to maintain action (in Minutes)</td></tr>
-            <tr><td>ddos_protect.tcp_flood.action</td><td>ignore</td><td>Default action: <em>ignore</em>, <em>drop</em>, <em>filter</em>, <em>mark</em>, or <em>limit</em></td></tr>
-            <tr><td>ddos_protect.tcp_flood.threshold</td><td>500000</td><td>Default threshold (in Packets per Second)</td></tr>
-            <tr><td>ddos_protect.tcp_flood.timeout</td><td>60</td><td>Default period to maintain action (in Minutes)</td></tr>
-            <tr><td>ddos_protect.udp_flood.action</td><td>ignore</td><td>Default action: <em>ignore</em>, <em>drop</em>, <em>filter</em>, <em>mark</em>, or <em>limit</em></td></tr>
-            <tr><td>ddos_protect.udp_flood.threshold</td><td>500000</td><td>Default threshold (in Packets per Second)</td></tr>
-            <tr><td>ddos_protect.udp_flood.timeout</td><td>60</td><td>Default period to maintain action (in Minutes)</td></tr>
-            <tr><td>ddos_protect.udp_amplification.action</td><td>ignore</td><td>Default action: <em>ignore</em>, <em>drop</em>, <em>filter</em>, <em>mark</em>, or <em>limit</em></td></tr>
-            <tr><td>ddos_protect.udp_amplification.threshold</td><td>500000</td><td>Default threshold (in Packets per Second)</td></tr>
-            <tr><td>ddos_protect.udp_amplification.timeout</td><td>60</td><td>Default period to maintain action (in Minutes)</td></tr>
-            <tr><td>ddos_protect.actions</td><td>manual</td><td>Default mitgation mode: <em>manual</em> or <em>automatic</em></td></tr>
-            <tr><td>ddos_protect.flow_seconds</td><td>2</td><td>Moving average used to smooth flow rates</td></tr>
-            <tr><td>ddos_protect.threshold_seconds</td><td>60</td><td>Hold time for threshold before it will re-trigger</td></tr>
-            <tr><td>ddos_protect.esr</td><td>no</td><td>Ignore event if there are insufficient samples for an accurate reading</td></tr>
-            <tr><td>ddos_protect.syslog.host</td><td></td><td>IP address of syslog collector</td></tr>
-            <tr><td>ddos_protect.syslog.port</td><td>514</td><td>UDP port for syslog events</td></tr>
-            <tr><td>ddos_protect.syslog.facility</td><td>16</td><td>Syslog facility, default <em>local0</em></td></tr>
-            <tr><td>ddos_protect.syslog.severity</td><td>5</td><td>Syslog severity, default <em>notice</em></td></tr>
-          </tbody>
-        </table>
+        <div class="table-responsive-xl">
+          <table class="table table-striped table-bordered table-sm">
+            <thead class="thead-light"><tr><th>Property</th><th>Default</th><th>Description</th></tr><thead>
+            <tbody>
+              <tr><td>bgp.start</td><td>no</td><td>Start BGP listener</td></tr>
+              <tr><td>bgp.port</td><td>1179</td><td>TCP port used to listen for BGP connections</td></tr>
+              <tr><td>ddos_protect.router</td><td>127.0.0.1</td><td>IP address of router used to implement null routes</td></tr>
+              <tr><td>ddos_protect.as</td><td>65000</td><td>Local AS number to advertise to router</td></tr>
+              <tr><td>ddos_protect.id</td><td>0.6.6.6</td><td>Local identifier to advertise to router</td></tr>
+              <tr><td>ddos_protect.community</td><td>65535:666</td><td>BGP community used to identify blackhole routes</td></tr>
+              <tr><td>ddos_protect.nexthop</td><td>192.0.2.1</td><td>BGP next hop used to identify blackhole routes</td></tr> 
+              <tr><td>ddos_protect.nexthop6</td><td>100::1</td><td>BGP IPv6 next hop used ot identify blackhole routes</td></tr>
+              <tr><td>ddos_protect.localpref</td><td>100</td><td>BGP local preference used to identify blackhole routes</td></tr>
+              <tr><td>ddos_protect.enable.ipv6</td><td>no</td><td>BGP enable IPv6 addresses</td></tr>
+              <tr><td>ddos_protect.enable.flowspec</td><td>no</td><td>BGP enable Flowspec IPv4 rules</td></tr>
+              <tr><td>ddos_protect.enable.flowspec6</td><td>no</td><td>BGP enable Flowspec IPv6 rules</td></tr>
+              <tr><td>ddos_protect.flowspec.dscp</td><td>le</td><td>BPG Flowspec DSCP value for marking traffic</td></tr>
+              <tr><td>ddos_protect.flowspec.rate</td><td>12500</td><td>BGP Flowspec rate (in Bytes per Second) for rate limited traffic</td></tr>
+              <tr><td>ddos_protect.flowspec.redirect.method</td><td>as</td><td>BGP Flowspec redirect method: <em>as</em>, <em>as4</em>, <em>ip</em>, <em>nexthop</em></td></tr>
+              <tr><td>ddos_protect.flowspec.redirect.as</td><td>65000:666</td><td>BGP Flowspec redirect VRF 2-octet AS, 4-octet value</td></tr>
+              <tr><td>ddos_protect.flowspec.redirect.as4</td><td>65000:666</td><td>BGP Flowspec redirect VRF 4-octet AS, 2-octet value</td></tr>
+              <tr><td>ddos_protect.flowspec.redirect.ip</td><td>192.0.2.1:666</td><td>BGP Flowspec redirect VRF IPv4 address, 2-octet value</td></tr>
+              <tr><td>ddos_protect.flowspec.redirect.nexthop</td><td>192.0.2.1</td><td>BGP Flowspec redirect next-hop for IPv4 flows</td></tr>
+              <tr><td>ddos_protect.flowspec.redirect.nexthop6</td><td>100::1</td><td>BGP Flowspec redirect next-hop for IPv6 flows</td></tr>
+              <tr><td>ddos_protect.flowspec.community</td><td>128:6:0</td><td>BGP Flowspec community</td></tr>
+              <tr><td>ddos_protect.maxroutes</td><td>1000</td><td>Maximum number of blackhole routes allowed</td></tr>
+              <tr><td>ddos_protect.maxflows</td><td>100</td><td>Maximum number of Flowspec rules allowed</td></tr>
+              <tr><td>ddos_protect.externalgroup</td><td>external</td><td>Address group for external traffic</td></tr>
+              <tr><td>ddos_protect.excludedgroups</td><td>external,private,multicast,exclude</td><td>Address groups to exclude as blackhole candidates</td></tr>
+              <tr><td>ddos_protect.group.&lt;name&gt;</td><td></td><td>Set default for address group <em>name</em> to comma separated list of CIDRs</td></tr>
+              <tr><td>ddos_protect.ip_flood.action</td><td>ignore</td><td>Default action: <em>ignore</em>, <em>drop</em>, <em>filter</em>, <em>mark</em>, or <em>limit</em></td></tr>
+              <tr><td>ddos_protect.ip_flood.threshold</td><td>1000000</td><td>Default threshold (in Packets per Second)</td></tr>
+              <tr><td>ddos_protect.ip_flood.timeout</td><td>180</td><td>Default period to maintain action (in Minutes)</td></tr>
+              <tr><td>ddos_protect.ip_fragmentation.action</td><td>ignore</td><td>Default action: <em>ignore</em>, <em>drop</em>, <em>filter</em>, <em>mark</em>, or <em>limit</em></td></tr>
+              <tr><td>ddos_protect.ip_fragmentation.threshold</td><td>500000</td><td>Default threshold (in Packets per Second)</td></tr>
+              <tr><td>ddos_protect.ip_fragmentation.timeout</td><td>60</td><td>Default period to maintain action (in Minutes)</td></tr>
+              <tr><td>ddos_protect.icmp_flood.action</td><td>ignore</td><td>Default action: <em>ignore</em>, <em>drop</em>, <em>filter</em>, <em>mark</em>, or <em>limit</em></td></tr>
+              <tr><td>ddos_protect.icmp_flood.threshold</td><td>500000</td><td>Default threshold (in Packets per Second)</td></tr>
+              <tr><td>ddos_protect.icmp_flood.timeout</td><td>60</td><td>Default period to maintain action (in Minutes)</td></tr>
+              <tr><td>ddos_protect.tcp_flood.action</td><td>ignore</td><td>Default action: <em>ignore</em>, <em>drop</em>, <em>filter</em>, <em>mark</em>, or <em>limit</em></td></tr>
+              <tr><td>ddos_protect.tcp_flood.threshold</td><td>500000</td><td>Default threshold (in Packets per Second)</td></tr>
+              <tr><td>ddos_protect.tcp_flood.timeout</td><td>60</td><td>Default period to maintain action (in Minutes)</td></tr>
+              <tr><td>ddos_protect.udp_flood.action</td><td>ignore</td><td>Default action: <em>ignore</em>, <em>drop</em>, <em>filter</em>, <em>mark</em>, or <em>limit</em></td></tr>
+              <tr><td>ddos_protect.udp_flood.threshold</td><td>500000</td><td>Default threshold (in Packets per Second)</td></tr>
+              <tr><td>ddos_protect.udp_flood.timeout</td><td>60</td><td>Default period to maintain action (in Minutes)</td></tr>
+              <tr><td>ddos_protect.udp_amplification.action</td><td>ignore</td><td>Default action: <em>ignore</em>, <em>drop</em>, <em>filter</em>, <em>mark</em>, or <em>limit</em></td></tr>
+              <tr><td>ddos_protect.udp_amplification.threshold</td><td>500000</td><td>Default threshold (in Packets per Second)</td></tr>
+              <tr><td>ddos_protect.udp_amplification.timeout</td><td>60</td><td>Default period to maintain action (in Minutes)</td></tr>
+              <tr><td>ddos_protect.actions</td><td>manual</td><td>Default mitgation mode: <em>manual</em> or <em>automatic</em></td></tr>
+              <tr><td>ddos_protect.flow_seconds</td><td>2</td><td>Moving average used to smooth flow rates</td></tr>
+              <tr><td>ddos_protect.threshold_seconds</td><td>60</td><td>Hold time for threshold before it will re-trigger</td></tr>
+              <tr><td>ddos_protect.esr</td><td>no</td><td>Ignore event if there are insufficient samples for an accurate reading</td></tr>
+              <tr><td>ddos_protect.syslog.host</td><td></td><td>IP address of syslog collector</td></tr>
+              <tr><td>ddos_protect.syslog.port</td><td>514</td><td>UDP port for syslog events</td></tr>
+              <tr><td>ddos_protect.syslog.facility</td><td>16</td><td>Syslog facility, default <em>local0</em></td></tr>
+              <tr><td>ddos_protect.syslog.severity</td><td>5</td><td>Syslog severity, default <em>notice</em></td></tr>
+            </tbody>
+          </table>
+        </div>
       </section>
     </main>
     <footer class="footer page-footer border-top mt-3">
