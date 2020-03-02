@@ -9,7 +9,8 @@ remote triggered black hole (RTBH) and FlowSpec to mitigate attack.
 
 1. [Download sFlow-RT](https://sflow-rt.com/download.php)
 2. Run command: `./sflow-rt/get-app.sh sflow-rt ddos-protect`
-3. Restart sFlow-RT
+3. Optionally, run command: `./sflow-rt/get-app.sh sflow-rt browse-flows`
+4. Restart sFlow-RT
 
 Alternatively, use the Docker image:
 https://hub.docker.com/r/sflow/ddos-protect/
