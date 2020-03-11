@@ -1,6 +1,6 @@
 // author: InMon
 // version: 1.0
-// date: 2/24/2020
+// date: 3/11/2020
 // description: Use BGP to mitigate DDoS flood attacks
 // copyright: Copyright (c) 2015-2020 InMon Corp.
 
@@ -493,7 +493,7 @@ setEventHandler(function(evt) {
       ctl.flowspec.match = {
         destination:target,
         version:'4',
-        protocol:protocol
+        protocol:'='+protocol
       };
       break;
     case 'ddos_protect_ip6_flood':
@@ -502,7 +502,7 @@ setEventHandler(function(evt) {
       ctl.flowspec.match = {
         destination:target,
         version:'6',
-        protocol:protocol
+        protocol:'='+protocol
       };
       break;
     case 'ddos_protect_icmp_flood':
@@ -511,8 +511,8 @@ setEventHandler(function(evt) {
       ctl.flowspec.match = {
         destination:target,
         version:'4',
-        protocol:'1',
-        'icmp-type':protocol
+        protocol:'=1',
+        'icmp-type':'='+protocol
       };
       break;
     case 'ddos_protect_icmp6_flood':
@@ -521,8 +521,8 @@ setEventHandler(function(evt) {
       ctl.flowspec.match = {
         destination:target,
         version:'6',
-        protocol:'58',
-        'icmp-type':protocol
+        protocol:'=58',
+        'icmp-type':'='+protocol
       };
       break;
     case 'ddos_protect_tcp_flood':
@@ -531,8 +531,8 @@ setEventHandler(function(evt) {
       ctl.flowspec.match = {
         destination:target,
         version:'4',
-        protocol:'6',
-        'destination-port':protocol
+        protocol:'=6',
+        'destination-port':'='+protocol
       }; 
       break;
     case 'ddos_protect_tcp6_flood':
@@ -541,8 +541,8 @@ setEventHandler(function(evt) {
       ctl.flowspec.match = {
         destination:target,
         version:'6',
-        protocol:'6',
-        'destination-port':protocol
+        protocol:'=6',
+        'destination-port':'='+protocol
       };
       break;
     case 'ddos_protect_udp_flood':
@@ -551,8 +551,8 @@ setEventHandler(function(evt) {
       ctl.flowspec.match = {
         destination:target,
         version:'4',
-        protocol:'17',
-        'destination-port':protocol
+        protocol:'=17',
+        'destination-port':'='+protocol
       };
       break;
     case 'ddos_protect_udp6_flood':
@@ -561,8 +561,8 @@ setEventHandler(function(evt) {
       ctl.flowspec.match = {
         destination:target,
         version:'6',
-        protocol:'17',
-        'destination-port':protocol
+        protocol:'=17',
+        'destination-port':'='+protocol
       };
       break;
     case 'ddos_protect_udp_amplification':
@@ -571,8 +571,8 @@ setEventHandler(function(evt) {
       ctl.flowspec.match = {
         destination:target,
         version:'4',
-        protocol:'17',
-        'source-port':protocol
+        protocol:'=17',
+        'source-port':'='+protocol
       };
       break;
     case 'ddos_protect_udp6_amplification':
@@ -581,8 +581,8 @@ setEventHandler(function(evt) {
       ctl.flowspec.match = {
         destination:target,
         version:'6',
-        protocol:'17',
-        'source-port':protocol
+        protocol:'=17',
+        'source-port':'='+protocol
       };
       break;
     case 'ddos_protect_ip_fragmentation':
@@ -591,8 +591,8 @@ setEventHandler(function(evt) {
       ctl.flowspec.match = {
         destination:target,
         version:'4',
-        protocol:protocol,
-        fragment:'I'
+        protocol:'='+protocol,
+        fragment:'=I'
       };
       break;
     case 'ddos_protect_ip6_fragmentation':
@@ -601,8 +601,8 @@ setEventHandler(function(evt) {
       ctl.flowspec.match = {
         destination:target,
         version:'6',
-        protocol:protocol,
-        fragment:'I'
+        protocol:'='+protocol,
+        fragment:'=I'
       };
       break;
   }
