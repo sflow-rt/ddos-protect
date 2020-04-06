@@ -372,9 +372,9 @@
 
         <h4>Configure BGP</h4>
         <p>Configure <em>Startup Settings</em> to enable BGP and ensure settings match those that
-        will be configured on router.  Configure site router (or route reflector) to establish a BGP connection
+        will be configured on router(s).  Configure site router(s) (or route reflector) to establish a BGP connection
         to controller on TCP port 1179. Use the <em>BGP</em> chart under the <em>Charts</em> tab to verify
-        that the connection has been establed.</p> 
+        the connection(s).</p> 
 
         <h4>Group Address Space</h4>
         <table class="table table-bordered table-sm">
@@ -463,9 +463,9 @@
             <tbody>
               <tr><td>bgp.start</td><td>no</td><td>Start BGP listener</td></tr>
               <tr><td>bgp.port</td><td>1179</td><td>TCP port used to listen for BGP connections</td></tr>
-              <tr><td>ddos_protect.router</td><td>127.0.0.1</td><td>IP address of router used to implement null routes</td></tr>
-              <tr><td>ddos_protect.as</td><td>65000</td><td>Local AS number to advertise to router</td></tr>
-              <tr><td>ddos_protect.id</td><td>0.6.6.6</td><td>Local identifier to advertise to router</td></tr>
+              <tr><td>ddos_protect.router</td><td>127.0.0.1</td><td>Comma separated list of BGP router IP addresses making connections</td></tr>
+              <tr><td>ddos_protect.as</td><td>65000</td><td>Local AS number to advertise to router(s)</td></tr>
+              <tr><td>ddos_protect.id</td><td>0.6.6.6</td><td>Local identifier to advertise to router(s)</td></tr>
               <tr><td>ddos_protect.community</td><td>65535:666</td><td>BGP community used to identify blackhole routes</td></tr>
               <tr><td>ddos_protect.nexthop</td><td>192.0.2.1</td><td>BGP next hop used to identify blackhole routes</td></tr> 
               <tr><td>ddos_protect.nexthop6</td><td>100::1</td><td>BGP IPv6 next hop used ot identify blackhole routes</td></tr>

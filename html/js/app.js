@@ -153,6 +153,7 @@ $(function() {
     type: 'trend',
     stack: false,
     metrics: ['connections'],
+    hrule: [{name:'threshold_connections',color:colors[3],scale:showThreshold}],
     units: 'BGP Connections'},
   db);
 

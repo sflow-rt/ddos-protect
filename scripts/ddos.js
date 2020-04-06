@@ -1,17 +1,17 @@
 // author: InMon
-// version: 1.0
-// date: 3/11/2020
+// version: 2.0
+// date: 4/6/2020
 // description: Use BGP to mitigate DDoS flood attacks
 // copyright: Copyright (c) 2015-2020 InMon Corp.
 
 include(scriptdir()+'/inc/trend.js');
 
-var router_ip = getSystemProperty("ddos_protect.router") || '127.0.0.1';
-var my_as     = getSystemProperty("ddos_protect.as") || '65000';
-var my_id     = getSystemProperty("ddos_protect.id") || '0.6.6.6';
+var router = getSystemProperty("ddos_protect.router") || '127.0.0.1';
+var my_as = getSystemProperty("ddos_protect.as") || '65000';
+var my_id = getSystemProperty("ddos_protect.id") || '0.6.6.6';
 var community = getSystemProperty("ddos_protect.community") || '65535:666'; // RFC7999
-var nexthop   = getSystemProperty("ddos_protect.nexthop") || '192.0.2.1';
-var nexthop6  = getSystemProperty("ddos_protect.nexthop6") || '100::1';
+var nexthop = getSystemProperty("ddos_protect.nexthop") || '192.0.2.1';
+var nexthop6 = getSystemProperty("ddos_protect.nexthop6") || '100::1';
 var localpref = getSystemProperty("ddos_protect.localpref") || '100';
 
 var route_max = getSystemProperty("ddos_protect.maxroutes") || '1000';
@@ -42,6 +42,8 @@ var syslogHost = getSystemProperty("ddos_protect.syslog.host");
 var syslogPort = getSystemProperty("ddos_protect.syslog.port") || '514';
 var syslogFacility = getSystemProperty("ddos_protect.syslog.facility") || '16'; // local0
 var syslogSeverity = getSystemProperty("ddos_protect.syslog.severity") || '5';  // notice
+
+var routers = router.split(',');
 
 function sendEvent(action,attack,target,group,protocol) {
   if(!syslogHost) return;
@@ -92,17 +94,18 @@ var counts = {};
 function updateControlCounts() {
   controlsUpdate++;
   counts = {n:0, blocked:0, pending:0, failed:0};
-  for(var addr in controls) {
+  for(var key in controls) {
     counts.n++;
-    switch(controls[addr].status) {
+    switch(controls[key].status) {
     case 'blocked':
-      counts.blocked++;
+      if(routers.reduce((flag, router_ip) => flag && controls[key].success[router_ip], true)) {
+        counts.blocked++;
+      } else {
+        counts.failed++;
+      }
       break;
     case 'pending':
       counts.pending++;
-      break;
-    case 'failed':
-      counts.failed++;
       break;
     } 
   }
@@ -110,91 +113,91 @@ function updateControlCounts() {
 
 var enabled = storeGet('enabled') || ("automatic" === getSystemProperty("ddos_protect.mode")) || false;
 
-var bgpUp = false;
+var bgpUp = {};
 
-function bgpBlackHole(ctl) {
+function bgpBlackHole(router_ip, ctl) {
   if(bgpRouteCount(router_ip) >= route_max) {
-    logWarning("DDoS exceeds route table limit, "+ctl.attack+" "+ctl.target+" "+ctl.group+" "+ctl.protocol);
-    ctl.status = 'failed';
+    logWarning("DDoS exceeds table limit, router "+router_ip+", "+ctl.attack+" "+ctl.target+" "+ctl.group+" "+ctl.protocol);
+    ctl.success[router_ip] = false;
     return;
   }
   switch(ctl.ipversion) {
     case '4':
       if(bgpAddRoute(router_ip,{prefix:ctl.target,nexthop:nexthop,communities:community,localpref:localpref})) {
-        ctl.status = 'blocked';
+        ctl.success[router_ip] = true;
       } else {
-        logWarning("DDoS failed, "+ctl.attack+" "+ctl.target+" "+ctl.group+" "+ctl.protocol);
-        ctl.status = 'failed';
+        logWarning("DDoS failed, router "+router_ip+", "+ctl.attack+" "+ctl.target+" "+ctl.group+" "+ctl.protocol);
+        ctl.success[router_ip] = false;
       }
       break;
     case '6':
       if(ipv6_enable) {
         if(bgpAddRoute(router_ip,{prefix:ctl.target,nexthop:nexthop6,communities:community,localpref:localpref})) {
-          ctl.status = 'blocked';
+          ctl.success[router_ip] = true;
         } else {
-          logWarning("DDoS failed, "+ctl.attack+" "+ctl.target+" "+ctl.group+" "+ctl.protocol);
-          ctl.status = 'failed';
+          logWarning("DDoS failed, router "+router_ip+", "+ctl.attack+" "+ctl.target+" "+ctl.group+" "+ctl.protocol);
+          ctl.success[router_ip] = false;
         }
       } else {
-        logWarning("DDoS IPv6 disabled, "+ctl.attack+" "+ctl.target+" "+ctl.group+" "+ctl.protocol);
-        ctl.status = 'failed';
+        logWarning("DDoS IPv6 disabled, router "+router_ip+", "+ctl.attack+" "+ctl.target+" "+ctl.group+" "+ctl.protocol);
+        ctl.success[router_ip] = false;
       }
       break;
   }
 }
 
-function bgpFlowSpec(ctl) {
+function bgpFlowSpec(router_ip, ctl) {
   if(bgpFlowCount(router_ip) >= flowspec_max) {
-    logWarning("DDoS exceeds FlowSpec table limit, "+ctl.attack+" "+ctl.target+" "+ctl.group+" "+ctl.protocol);
-    ctl.status = 'failed';
+    logWarning("DDoS exceeds Flowspec table limit, router "+router_ip+", "+ctl.attack+" "+ctl.target+" "+ctl.group+" "+ctl.protocol);
+    ctl.success[router_ip] = false;
     return;
   }
   switch(ctl.ipversion) {
     case '4': 
       if(flowspec_enable) {
         if(bgpAddFlow(router_ip,ctl.flowspec)) {
-          ctl.status = 'blocked';
+          ctl.success[router_ip] = true;
         } else {
-          logWarning("DDoS failed, "+ctl.attack+" "+ctl.target+" "+ctl.group+" "+ctl.protocol);
-          ctl.status = 'failed';
+          logWarning("DDoS failed, router "+router_ip+", "+ctl.attack+" "+ctl.target+" "+ctl.group+" "+ctl.protocol);
+          ctl.success[router_ip] = false;
         }
       } else {
-        logWarning("DDoS FlowSpec disabled, "+ctl.attack+" "+ctl.target+" "+ctl.group+" "+ctl.protocol);
-        ctl.status = 'failed';
+        logWarning("DDoS Flowspec disabled, router "+router_ip+", "+ctl.attack+" "+ctl.target+" "+ctl.group+" "+ctl.protocol);
+        ctl.success[router_ip] = false;
       }
       break;
     case '6':
       if(flowspec6_enable) {
         if(bgpAddFlow(router_ip,ctl.flowspec)) {
-          ctl.status = 'blocked';
+          ctl.success[router_ip] = true;
         } else {
-          logWarning("DDoS failed, "+ctl.attack+" "+ctl.target+" "+ctl.group+" "+ctl.protocol);
-          ctl.status = 'failed';
+          logWarning("DDoS failed, router "+router_ip+", "+ctl.attack+" "+ctl.target+" "+ctl.group+" "+ctl.protocol);
+          ctl.success[router_ip] = false;
         }
       } else {
-        logWarning("DDoS IPv6 FlowSpec disabled, "+ctl.attack+" "+ctl.target+" "+ctl.group+" "+ctl.protocol);
-        ctl.status = 'failed';
+        logWarning("DDoS IPv6 Flowspec disabled, router "+router_ip+", "+ctl.attack+" "+ctl.target+" "+ctl.group+" "+ctl.protocol);
+        ctl.success[router_ip] = false;
       }
       break;
   }
 }
 
-function bgpAddControl(ctl) {
+function bgpAddControl(router_ip, ctl) {
   switch(ctl.action) {
     case 'drop':
-      bgpBlackHole(ctl); 
+      bgpBlackHole(router_ip, ctl); 
       break;
     case 'filter':
       ctl.flowspec.then={'traffic-rate':'0'};
-      bgpFlowSpec(ctl);
+      bgpFlowSpec(router_ip, ctl);
       break;
     case 'mark':
       ctl.flowspec.then={'traffic-marking':flowspec_dscp};
-      bgpFlowSpec(ctl);
+      bgpFlowSpec(router_ip, ctl);
       break;
     case 'limit':
       ctl.flowspec.then={'traffic-rate':flowspec_rate};
-      bgpFlowSpec(ctl);
+      bgpFlowSpec(router_ip, ctl);
       break;
     case 'redirect':
       ctl.flowspec.then={};
@@ -219,64 +222,64 @@ function bgpAddControl(ctl) {
           }
           break;
       }
-      bgpFlowSpec(ctl);
+      bgpFlowSpec(router_ip, ctl);
       break;
     case 'community':
       ctl.flowspec.then={'communities':flowspec_community};
-      bgpFlowSpec(ctl);
+      bgpFlowSpec(router_ip, ctl);
       break;
     case 'ignore':
       break;
   }
 }
 
-function bgpRemoveControl(ctl) {
-  if(ctl.status !== 'blocked') return;
+function bgpRemoveControl(router_ip, ctl) {
+  if(ctl.status !== 'blocked' || !ctl.success[router_ip]) return;
 
   switch(ctl.action) {
     case 'drop':
-      bgpRemoveRoute(router_ip,ctl.target);
+      bgpRemoveRoute(router_ip, ctl.target);
       break;
     case 'filter':
     case 'mark':
     case 'limit':
     case 'redirect':
     case 'community':
-      bgpRemoveFlow(router_ip,ctl.flowspec);
+      bgpRemoveFlow(router_ip, ctl.flowspec);
       break;
     case 'ignore':
       break;
   }
 }
 
-function bgpOpen() {
-  bgpUp = true;
+function bgpOpen(router_ip) {
+  bgpUp[router_ip] = true;
 
   // re-install controls
   for(var key in controls) {
     let ctl = controls[key];
-    if(ctl.status === 'blocked' || ctl.status === 'failed') {
-      bgpAddControl(ctl);
+    if(ctl.status === 'blocked') {
+      bgpAddControl(router_ip, ctl);
     }
   }
   updateControlCounts();
 }
 
-function bgpClose() {
-  bgpUp = false;
+function bgpClose(router_ip) {
+  bgpUp[router_ip] = false;
 
   // update control status
   for(var key in controls) {
     let ctl = controls[key];
     if(ctl.status === 'blocked') {
-      ctl.status = 'failed';
+      ctl.success[router_ip] = false;
     }
   }
   updateControlCounts();
 }
 
 var bgpOpts = {ipv6:ipv6_enable, flowspec:flowspec_enable, flowspec6:flowspec6_enable};
-bgpAddNeighbor(router_ip, my_as, my_id, bgpOpts, bgpOpen, bgpClose);
+routers.forEach(router => bgpAddNeighbor(router, my_as, my_id, bgpOpts, bgpOpen, bgpClose));
 
 setGroups('ddos_protect', groups);
 
@@ -409,7 +412,10 @@ function applyControl(ctl) {
   sendEvent(ctl.action,ctl.attack,ctl.target,ctl.group,ctl.protocol);
 
   controls[ctl.key] = ctl;
-  if(enabled) bgpAddControl(ctl);
+  if(enabled) {
+    routers.forEach(router_ip => bgpAddControl(router_ip, ctl));
+    ctl.status = 'blocked';
+  }
   updateControlCounts();
 }
 
@@ -424,7 +430,7 @@ function releaseControl(ctl) {
   logInfo("DDoS release "+ctl.attack+" "+ctl.target+" "+ctl.group+" "+ctl.protocol);
   sendEvent("release",ctl.attack,ctl.target,ctl.group,ctl.protocol);
 
-  bgpRemoveControl(ctl);
+  routers.forEach(router_ip => bgpRemoveControl(router_ip, ctl));
   delete controls[ctl.key];
   updateControlCounts();
 }
@@ -443,14 +449,15 @@ function getControlForId(id) {
 function operatorConfirm(id) {
   var ctl = getControlForId(id);
   if(!ctl) return;
-  bgpAddControl(ctl);
+  routers.forEach(router_ip => bgpAddControl(router_ip, ctl));
+  ctl.status = 'blocked';
   updateControlCounts();
 }
 
 function operatorIgnore(id) {
   var ctl = getControlForId(id);
   if(!ctl) return;
-  bgpRemoveControl(ctl);
+  routers.forEach(router_ip => bgpRemoveControl(router_ip, ctl));
   delete controls[ctl.key];
   updateControlCounts(); 
 }
@@ -483,7 +490,8 @@ setEventHandler(function(evt) {
     group:group,
     protocol:protocol,
     flowspec:{},
-    event:evt
+    event:evt,
+    success:{}
   };
 
   switch(evt.thresholdID) {
@@ -646,7 +654,7 @@ setIntervalHandler(function(now) {
   points['controls_pending'] = counts.pending || 0;
   points['controls_failed'] = counts.failed || 0;
   points['controls_blocked'] = counts.blocked || 0;
-  points['connections'] = bgpUp ? 1 : 0;
+  points['connections'] = routers.reduce((sum, router_ip) => sum + (bgpUp[router_ip] ? 1 : 0), 0);
   points['top-5-ip-flood'] = calculateTopN(['ddos_protect_ip_flood','ddos_protect_ip6_flood'],5,1);
   points['top-5-ip-fragmentation'] = calculateTopN(['ddos_protect_ip_fragmentation','ddos_protect_ip6_fragmentation'],5,1);
   points['top-5-udp-flood'] = calculateTopN(['ddos_protect_udp_flood','ddos_protect_udp6_flood'],5,1);
@@ -673,7 +681,13 @@ function updateSettings(vals) {
         if(val) {
           switch(param) {
             case 'action':
-              if('ignore' === val || 'drop' === val || 'filter' === val || 'mark' === val || 'limit' === val || 'redirect' === val || 'community' === val) {
+              if('ignore' === val
+                 || 'drop' === val
+                 || 'filter' === val
+                 || 'mark' === val
+                 || 'limit' === val
+                 || 'redirect' === val
+                 || 'community' === val) {
                 newEntry[param] = val;
               } else {
                 return false;
@@ -720,6 +734,7 @@ setHttpHandler(function(req) {
       result.trend = req.query.after ? trend.after(parseInt(req.query.after)) : trend;
       result.trend.values = {};
       Object.keys(settings).forEach(function(key) { result.trend.values['threshold_'+key] = settings[key].threshold; });
+      result.trend.values['threshold_connections'] = routers.length;
       break;
     case 'controls':
       result = {};
@@ -739,6 +754,12 @@ setHttpHandler(function(req) {
       result.controls = [];
       for(key in controls) {
         let ctl = controls[key];
+        let status = ctl.status;
+        if(status === 'blocked') {
+           if(!routers.reduce((flag, router_ip) => flag && controls[key].success[router_ip], true)) {
+             status = 'failed';
+           }
+        }
         let entry = {
           id: ctl.id,
           target: ctl.target,
@@ -747,7 +768,7 @@ setHttpHandler(function(req) {
           attack: ctl.attack,
           time: ctl.time,
           action: ctl.action,
-          status: ctl.status 
+          status: status 
         }
         result.controls.push(entry); 
       };
