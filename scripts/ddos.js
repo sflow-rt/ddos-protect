@@ -1,6 +1,6 @@
 // author: InMon
 // version: 2.0
-// date: 4/6/2020
+// date: 4/8/2020
 // description: Use BGP to mitigate DDoS flood attacks
 // copyright: Copyright (c) 2015-2020 InMon Corp.
 
@@ -720,7 +720,7 @@ function updateSettings(vals) {
 
 var groupsUpdate = 0;
 setHttpHandler(function(req) {
-  var result, key, entry, action, path = req.path;
+  var result, key, path = req.path;
   if(!path || path.length == 0) throw "not_found";
   switch(path[0]) {
     case 'trend':
