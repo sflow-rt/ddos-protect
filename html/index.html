@@ -455,6 +455,13 @@
         installed. Click on a row in the <em>Controls</em> table to manually <em>Remove</em> or <em>Install</em> the
         control.</p>
 
+        <h3>Monitoring</h3>
+        <p>Integration is provided with external monitoring systems:</p>
+        <ul>
+        <li><strong>Events</strong> are logged every time a new attack is detected. These events can be forwarded using the <em>syslog</em> protocol. Configure <em>ddos_protect.syslog.host</em> to specify the IP address of the event logging system.</li>
+        <li><strong>Metrics</strong> are <a href="../scripts/ddos.js/prometheus/txt">published</a> using the Prometheus export format. Configure metrics database to periodically request current values.</li> 
+        </ul>
+
         <h3>Startup Settings</h3>
         <p>See <a href="https://sflow-rt.com/reference.php#properties">System Properties</a> for information on configuring startup settings.</p>
         <div class="table-responsive-xl">
