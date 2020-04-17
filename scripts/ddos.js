@@ -1,6 +1,6 @@
 // author: InMon
 // version: 2.0
-// date: 4/10/2020
+// date: 4/17/2020
 // description: Use BGP to mitigate DDoS flood attacks
 // copyright: Copyright (c) 2015-2020 InMon Corp.
 
@@ -32,6 +32,7 @@ var flowspec_redirect_nexthop6 = getSystemProperty("ddos_protect.flowspec.redire
 var flowspec_community = getSystemProperty("ddos_protect.flowspec.community") || '128:6:0'; // drop
 
 var effectiveSamplingRateFlag = getSystemProperty("ddos_protect.esr") === 'yes';
+var effectiveSamplingRateThreshold = getSystemProperty("ddos_protect.esr_samples") || '15';
 var flow_t = getSystemProperty("ddos_protect.flow_seconds") || '2';
 var threshold_t = getSystemProperty("ddos_protect.threshold_seconds") || '60';
 
@@ -475,7 +476,7 @@ setEventHandler(function(evt) {
     let dsInfo = datasourceInfo(evt.agent,evt.dataSource);
     if(!dsInfo) return;
     let rate = dsInfo.effectiveSamplingRate;
-    if(!rate || rate > (evt.threshold / 10)) {
+    if(!rate || flow_t * evt.threshold / rate < effectiveSamplingRateThreshold) {
       logWarning("DDoS effectiveSampling rate "+rate+" too high for "+evt.agent);
       return;
     }
