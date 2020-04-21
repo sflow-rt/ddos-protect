@@ -1,6 +1,6 @@
 // author: InMon
 // version: 2.0
-// date: 4/17/2020
+// date: 4/21/2020
 // description: Use BGP to mitigate DDoS flood attacks
 // copyright: Copyright (c) 2015-2020 InMon Corp.
 
@@ -48,15 +48,18 @@ const prometheus_prefix = getSystemProperty("prometheus.metric.prefix") || 'sflo
 
 var routers = router.split(',');
 
+var syslogHosts = syslogHost ? syslogHost.split(',') : [];
 function sendEvent(action,attack,target,group,protocol) {
-  if(!syslogHost) return;
+  if(syslogHosts.length === 0) return;
 
   var msg = {app:'ddos-protect',action:action,attack:attack,ip:target,group:group,protocol:protocol};
-  try {
-    syslog(syslogHost,syslogPort,syslogFacility,syslogSeverity,msg);
-  } catch(e) {
-    logWarning('DDoS cannot send syslog to ' + syslogHost); 
-  }
+  syslogHosts.forEach(function(host) {
+    try {
+      syslog(host,syslogPort,syslogFacility,syslogSeverity,msg);
+    } catch(e) {
+      logWarning('DDoS cannot send syslog to ' + host); 
+    }
+  });
 }
 
 var defaultGroups = {
