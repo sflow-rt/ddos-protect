@@ -1,6 +1,6 @@
 // author: InMon
-// version: 2.0
-// date: 4/21/2020
+// version: 2.1
+// date: 10/26/2020
 // description: Use BGP to mitigate DDoS flood attacks
 // copyright: Copyright (c) 2015-2020 InMon Corp.
 
@@ -38,6 +38,8 @@ var threshold_t = getSystemProperty("ddos_protect.threshold_seconds") || '60';
 
 var externalGroup = getSystemProperty("ddos_protect.externalgroup") || 'external';
 var excludedGroups = getSystemProperty("ddos_protect.excludedgroups") || 'external,private,multicast,exclude';
+var bgpGroup = getSystemProperty("ddos_protect.bgpgroup");
+var externalGroupSet = externalGroup ? new Set(externalGroup.split(',')) : new Set();
 
 var syslogHost = getSystemProperty("ddos_protect.syslog.host");
 var syslogPort = getSystemProperty("ddos_protect.syslog.port") || '514';
@@ -73,7 +75,7 @@ getSystemPropertyNames()
   .forEach(function(prop) {
     var [,,name] = prop.split('.');
     defaultGroups[name] = getSystemProperty(prop).split(',');
-});
+  });
 
 var groups = storeGet('groups') || defaultGroups;
 
@@ -285,86 +287,129 @@ function bgpClose(router_ip) {
 }
 
 var bgpOpts = {ipv6:ipv6_enable, flowspec:flowspec_enable, flowspec6:flowspec6_enable};
-routers.forEach(router => bgpAddNeighbor(router, my_as, my_id, bgpOpts, bgpOpen, bgpClose));
+routers.forEach(function(router,idx) {
+  bgpAddNeighbor(router, my_as, my_id, bgpOpts, bgpOpen, bgpClose);
+  // Optionally map sFlow agents to routers to add BGP metadata to flows
+  // Note: Only needed for routers that don't support sFlow extended_gateway structure
+  var agt = getSystemProperty("ddos_protect.router."+idx+".agent");
+  if(agt) {
+    agt.split(',').forEach(agent => bgpAddSource(agent,router));
+  }
+});
 
 setGroups('ddos_protect', groups);
 
 // IPv4 attacks
 var keys = 'ipdestination,group:ipdestination:ddos_protect';
-var filter = 'first:stack:.:ip:ip6=ip&group:ipsource:ddos_protect='+externalGroup+'&group:ipdestination:ddos_protect!='+excludedGroups;
+var filter = 'first:stack:.:ip:ip6=ip';
+var value = 'frames';
+var values = 'count:ipsource,avg:ipbytes';
+var bgpExcludedGroups;
+if(bgpGroup) {
+  filter += '&eq:bgpsourceas:bgpas=false&eq:bgpdestinationas:bgpas=true';
+
+  // remove the external group from excluded groups since internal / external determination made via BGP
+  bgpExcludedGroups = excludedGroups.split(',').filter(group => !externalGroupSet.has(group)).join(',');
+  if(bgpExcludedGroups) {
+    filter += '&group:ipdestination:ddos_protect!='+bgpExcludedGroups;
+  } 
+} else {
+  filter += '&group:ipsource:ddos_protect='+externalGroup+'&group:ipdestination:ddos_protect!='+excludedGroups;
+}
 setFlow('ddos_protect_ip_flood', {
   keys: keys+',ipprotocol',
-  value:'frames',
+  value:value,
+  values:values,
   filter:filter,
   t:flow_t
 });
 setFlow('ddos_protect_ip_fragmentation', {
   keys: keys+',ipprotocol',
-  value:'frames',
+  value:value,
+  values:values,
   filter:'(ipflags=001|range:ipfragoffset:1=true)&'+filter,
   t:flow_t
 });
 setFlow('ddos_protect_udp_amplification', {
   keys:keys+',udpsourceport',
-  value:'frames',
+  value:value,
+  values:values,
   filter:'ipprotocol=17&'+filter,
   t:flow_t
 });
 setFlow('ddos_protect_udp_flood', {
   keys:keys+',udpdestinationport',
-  value:'frames',
+  value:value,
+  values:values,
   filter:'ipprotocol=17&'+filter,
   t:flow_t
 });
 setFlow('ddos_protect_icmp_flood', {
   keys:keys+',icmptype',
-  value:'frames',
+  value:value,
+  values:values,
   filter:'ipprotocol=1&'+filter,
   t:flow_t
 });
 setFlow('ddos_protect_tcp_flood', {
   keys:keys+',tcpdestinationport',
-  value:'frames',
+  value:value,
+  values:values,
   filter:'ipprotocol=6&'+filter,
   t:flow_t
 });
 
 // IPv6 attacks
 var keys6 = 'ip6destination,group:ip6destination:ddos_protect';
-var filter6 = 'first:stack:.:ip:ip6=ip6&group:ip6source:ddos_protect='+externalGroup+'&group:ip6destination:ddos_protect!='+excludedGroups;
+var values6 = 'count:ip6source,avg:ip6bytes';
+var filter6 = 'first:stack:.:ip:ip6=ip6';
+if(bgpGroup) {
+  filter6 += '&eq:bgpsourceas:bgpas=false&eq:bgpdestinationas:bgpas=true';
+  if(bgpExcludedGroups) { 
+    filter6 += '&group:ip6destination:ddos_protect!='+bgpExcludedGroups;
+  }
+} else {
+  filter6 += '&group:ip6source:ddos_protect='+externalGroup+'&group:ip6destination:ddos_protect!='+excludedGroups;
+}
 setFlow('ddos_protect_ip6_flood', {
   keys: keys6+',ip6nexthdr',
-  value:'frames',
+  value:value,
+  values:values6,
   filter:filter6,
   t:flow_t
 });
 setFlow('ddos_protect_ip6_fragmentation', {
   keys: keys6+',ip6nexthdr',
-  value:'frames',
+  value:value,
+  values:values6,
   filter:'(ip6fragm=yes|range:ip6fragoffset:1=true)&'+filter6,
   t:flow_t
 });
 setFlow('ddos_protect_udp6_amplification', {
   keys:keys6+',udpsourceport',
-  value:'frames',
+  value:value,
+  values:values6,
   filter:'ip6nexthdr=17&'+filter6,
   t:flow_t
 });
 setFlow('ddos_protect_udp6_flood', {
   keys:keys6+',udpdestinationport',
-  value:'frames',
+  value:value,
+  values:values6,
   filter:'ip6nexthdr=17&'+filter6,
   t:flow_t
 });
 setFlow('ddos_protect_icmp6_flood', {
   keys:keys6+',icmp6type',
-  value:'frames',
+  value:value,
+  values:values6,
   filter:'ip6nexthdr=58&'+filter6,
   t:flow_t
 });
 setFlow('ddos_protect_tcp6_flood', {
   keys:keys6+',tcpdestinationport',
-  value:'frames',
+  value:value,
+  values:values6,
   filter:'ip6nexthdr=6&'+filter6,
   t:flow_t
 });
@@ -486,6 +531,12 @@ setEventHandler(function(evt) {
   }
 
   var [target,group,protocol] = evt.flowKey.split(',');
+  var [attackers,packetsize] = evt.values ? evt.values : [0,0];
+
+  if(bgpGroup && externalGroupSet.has(group)) {
+    // override external group name since BGP determined address is local
+    group = bgpGroup;
+  }
 
   var ctl = {
     id:'c' + idx++,
@@ -495,6 +546,8 @@ setEventHandler(function(evt) {
     target:target,
     group:group,
     protocol:protocol,
+    attackers:attackers,
+    packetsize:packetsize,
     flowspec:{},
     event:evt,
     success:{}
@@ -786,6 +839,8 @@ setHttpHandler(function(req) {
           group: ctl.group,
           protocol: ctl.protocol,
           attack: ctl.attack,
+          attackers:ctl.attackers,
+          packetsize:ctl.packetsize,
           time: ctl.time,
           action: ctl.action,
           status: status 

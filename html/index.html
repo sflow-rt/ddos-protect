@@ -471,6 +471,7 @@
               <tr><td>bgp.start</td><td>no</td><td>Start BGP listener</td></tr>
               <tr><td>bgp.port</td><td>1179</td><td>TCP port used to listen for BGP connections</td></tr>
               <tr><td>ddos_protect.router</td><td>127.0.0.1</td><td>Comma separated list of BGP router IP addresses making connections</td></tr>
+              <tr><td>ddos_protect.router.&lt;N&gt;.agent</td><td></td><td>Use Nth (starting at 0) router to lookup BGP routes for comma separated list of agents</td></tr> 
               <tr><td>ddos_protect.as</td><td>65000</td><td>Local AS number to advertise to router(s)</td></tr>
               <tr><td>ddos_protect.id</td><td>0.6.6.6</td><td>Local identifier to advertise to router(s)</td></tr>
               <tr><td>ddos_protect.community</td><td>65535:666</td><td>BGP community used to identify blackhole routes</td></tr>
@@ -494,6 +495,7 @@
               <tr><td>ddos_protect.externalgroup</td><td>external</td><td>Address group for external traffic</td></tr>
               <tr><td>ddos_protect.excludedgroups</td><td>external,private,multicast,exclude</td><td>Address groups to exclude as blackhole candidates</td></tr>
               <tr><td>ddos_protect.group.&lt;name&gt;</td><td></td><td>Set default for address group <em>name</em> to comma separated list of CIDRs</td></tr>
+              <tr><td>ddos_protect.bgpgroup</td><td></td><td>Set group name for local addresses and use BGP to learn local / non-local CIDRs</td>
               <tr><td>ddos_protect.ip_flood.action</td><td>ignore</td><td>Default action: <em>ignore</em>, <em>drop</em>, <em>filter</em>, <em>mark</em>, or <em>limit</em></td></tr>
               <tr><td>ddos_protect.ip_flood.threshold</td><td>1000000</td><td>Default threshold (in Packets per Second)</td></tr>
               <tr><td>ddos_protect.ip_flood.timeout</td><td>180</td><td>Default period to maintain action (in Minutes)</td></tr>
