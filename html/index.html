@@ -374,7 +374,27 @@
         <p>Configure <em>Startup Settings</em> to enable BGP and ensure settings match those that
         will be configured on router(s).  Configure site router(s) (or route reflector) to establish a BGP connection
         to controller on TCP port 1179. Use the <em>BGP</em> chart under the <em>Charts</em> tab to verify
-        the connection(s).</p> 
+        the connection(s).</p>
+        <p>If the router cannot be configured to connect to the non-standard 1179 BGP port then additional operating
+        system privileges need to be assigned to the sFlow-RT daemon so that port 179 can be opened.</p>
+        <h5>Docker</h5>
+        <p>Using the <a href="https://hub.docker.com/r/sflow/ddos-protect">sflow/ddos-protect</a> image:</p>
+        <pre class="bg-light"><code>docker run --net=host \
+-v $PWD/ddos.conf:/sflow-rt/ddos.conf \
+--sysctl net.ipv4.ip_unprivileged_port_start=0 \
+sflow/ddos-protect -Dsystem.propertyFiles=ddos.conf -Dbgp.port=179</code></pre>
+        <h5>Systemd</h5>
+        <p>Edit the sflow-rt service</p>
+        <pre class="bg-light"><code>sudo systemctl edit sflow-rt.service</code></pre>
+        <p>Add the following statements:</p>
+        <pre class="bg-light"><code>[Service]
+AmbientCapabilities=CAP_NET_BIND_SERVICE</code></pre>
+        <p>Edit the ddos-protect configuration file:</p>
+        <pre class="bg-light">sudo vi /usr/local/sflow-rt/conf.d/ddos-protect.conf</code></pre>
+        <p>Add the line:</p>
+        <pre class="bg-light">bgp.port=179</code></pre>
+        <p>Restart sFlow-RT:</p>
+        <pre class="bg-light">sudo systemctl restart sflow-rt.service</code></pre>
 
         <h4>Group Address Space</h4>
         <table class="table table-bordered table-sm">
@@ -413,6 +433,15 @@
         mitigation in the case of a DDoS attack, in this case the <em>servers</em> group with CIDR 192.0.2.128/25.</p>
         <p><strong>Note</strong> At least one candidate group must be defined before traffic will be shown under the
         <em>Charts</em> tab.</p>
+        <p>Alternatively, local / non-local address space can be discovered through BGP:</p> 
+        <ol>
+          <li>Enable export of BGP data in the sFlow configuration on routers that support the sFlow <em>extended_gateway</em> feature</li>
+          <li>Otherwise, use the <code>ddos_protect.router.&lt;N&gt;.agent</code> setting to lookup route information from the BGP feed</li>
+        </ol>
+        <p>Once BGP route information is being received, the <code>ddos_protect.bgpgroup=site</code> setting enables classification
+        of traffic based on the learned routes, assigning local addresses to the <em>site</em> group. Excluded groups are honored
+        and additional groups will be used to label traffic, but will not affect determination of site addresses.</p>
+         
 
         <h4>Set Mitigation Policy</h4>
         <p>The following volumetric DDoS attack types can be detected:</p>
