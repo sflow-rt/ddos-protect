@@ -73,8 +73,13 @@ var defaultGroups = {
 getSystemPropertyNames()
   .filter(p => p.match('^ddos_protect\\.group\\.'))
   .forEach(function(prop) {
+    var val = getSystemProperty(prop);
     var [,,name] = prop.split('.');
-    defaultGroups[name] = getSystemProperty(prop).split(',');
+    if(val) {
+      defaultGroups[name] = val.split(',');
+    } else {
+      delete defaultGroups[name];
+    }
   });
 
 var groups = storeGet('groups') || defaultGroups;
