@@ -302,7 +302,21 @@ routers.forEach(function(router,idx) {
   }
 });
 
-setGroups('ddos_protect', groups);
+function configureGroups(groups) {
+  if(bgpGroup) {
+    // replace external groups since these are learned via BGP
+    let filtered = {};
+    filtered[bgpGroup] = ['0.0.0.0/0','::/0'];
+    Object.keys(groups).forEach(function(key) {
+      if(!externalGroupSet.has(key)) filtered[key] = groups[key];
+    });
+    return setGroups('ddos_protect', filtered);
+  }
+  return setGroups('ddos_protect', groups);
+}
+  
+
+configureGroups(groups);
 
 // IPv4 attacks
 var keys = 'ipdestination,group:ipdestination:ddos_protect';
@@ -537,11 +551,6 @@ setEventHandler(function(evt) {
 
   var [target,group,protocol] = evt.flowKey.split(',');
   var [attackers,packetsize] = evt.values ? evt.values : [0,0];
-
-  if(bgpGroup && externalGroupSet.has(group)) {
-    // override external group name since BGP determined address is local
-    group = bgpGroup;
-  }
 
   var ctl = {
     id:'c' + idx++,
@@ -882,7 +891,7 @@ setHttpHandler(function(req) {
         case 'POST':
         case 'PUT':
           if(req.error) throw "bad_request";
-          if(!setGroups('ddos_protect', req.body)) throw "bad_request";
+          if(!configureGroups('ddos_protect', req.body)) throw "bad_request";
           groups = req.body;
           storeSet('groups', groups);
           groupsUpdate++;
