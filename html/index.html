@@ -512,12 +512,13 @@ AmbientCapabilities=CAP_NET_BIND_SERVICE</code></pre>
               <tr><td>ddos_protect.enable.flowspec6</td><td>no</td><td>BGP enable Flowspec IPv6 rules</td></tr>
               <tr><td>ddos_protect.flowspec.dscp</td><td>le</td><td>BPG Flowspec DSCP value for marking traffic</td></tr>
               <tr><td>ddos_protect.flowspec.rate</td><td>12500</td><td>BGP Flowspec rate (in Bytes per Second) for rate limited traffic</td></tr>
-              <tr><td>ddos_protect.flowspec.redirect.method</td><td>as</td><td>BGP Flowspec redirect method: <em>as</em>, <em>as4</em>, <em>ip</em>, <em>nexthop</em></td></tr>
+              <tr><td>ddos_protect.flowspec.redirect.method</td><td>as</td><td>BGP Flowspec redirect method: <em>as</em>, <em>as4</em>, <em>ip</em>, <em><a href="https://tools.ietf.org/html/draft-simpson-idr-flowspec-redirect-02">nexthop</a></em>, <em><a href="https://tools.ietf.org/html/draft-ietf-idr-flowspec-redirect-ip-02">ipaction</a></em></td></tr>
               <tr><td>ddos_protect.flowspec.redirect.as</td><td>65000:666</td><td>BGP Flowspec redirect VRF 2-octet AS, 4-octet value</td></tr>
               <tr><td>ddos_protect.flowspec.redirect.as4</td><td>65000:666</td><td>BGP Flowspec redirect VRF 4-octet AS, 2-octet value</td></tr>
               <tr><td>ddos_protect.flowspec.redirect.ip</td><td>192.0.2.1:666</td><td>BGP Flowspec redirect VRF IPv4 address, 2-octet value</td></tr>
               <tr><td>ddos_protect.flowspec.redirect.nexthop</td><td>192.0.2.1</td><td>BGP Flowspec redirect next-hop for IPv4 flows</td></tr>
               <tr><td>ddos_protect.flowspec.redirect.nexthop6</td><td>100::1</td><td>BGP Flowspec redirect next-hop for IPv6 flows</td></tr>
+              <tr><td>ddos_protect.flowspec.redirect.ipaction</td><td>192.0.2.1</td><td>BGP Flowspec redirect IPv4 next-hop action</td></tr>
               <tr><td>ddos_protect.flowspec.community</td><td>128:6:0</td><td>BGP Flowspec community</td></tr>
               <tr><td>ddos_protect.maxroutes</td><td>1000</td><td>Maximum number of blackhole routes allowed</td></tr>
               <tr><td>ddos_protect.maxflows</td><td>100</td><td>Maximum number of Flowspec rules allowed</td></tr>
@@ -559,7 +560,7 @@ AmbientCapabilities=CAP_NET_BIND_SERVICE</code></pre>
     </main>
     <footer class="footer page-footer border-top mt-3">
        <div class="footer-copyright text-center py-2">
-         <small class="text-muted">Copyright &copy; 2015-2020 InMon Corp. ALL RIGHTS RESERVED</small>
+         <small class="text-muted">Copyright &copy; 2015-2021 InMon Corp. ALL RIGHTS RESERVED</small>
        </div>
     </footer>
   </body>

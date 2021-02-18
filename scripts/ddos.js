@@ -1,8 +1,8 @@
 // author: InMon
-// version: 2.1
-// date: 11/3/2020
+// version: 2.2
+// date: 2/18/2021
 // description: Use BGP to mitigate DDoS flood attacks
-// copyright: Copyright (c) 2015-2020 InMon Corp.
+// copyright: Copyright (c) 2015-2021 InMon Corp.
 
 include(scriptdir()+'/inc/trend.js');
 
@@ -29,6 +29,7 @@ var flowspec_redirect_as4 = getSystemProperty("ddos_protect.flowspec.redirect.as
 var flowspec_redirect_ip = getSystemProperty("ddos_protect.flowspec.redirect.ip") || '192.0.2.1:666';
 var flowspec_redirect_nexthop = getSystemProperty("ddos_protect.flowspec.redirect.nexthop") || '192.0.2.1';
 var flowspec_redirect_nexthop6 = getSystemProperty("ddos_protect.flowspec.redirect.nexthop6") || '100::1';
+var flowspec_redirect_ipaction = getSystemProperty("ddos_protect.flowspec.redirect.ipaction") || '192.0.2.1';
 var flowspec_community = getSystemProperty("ddos_protect.flowspec.community") || '128:6:0'; // drop
 
 var effectiveSamplingRateFlag = getSystemProperty("ddos_protect.esr") === 'yes';
@@ -233,6 +234,9 @@ function bgpAddControl(router_ip, ctl) {
               ctl.flowspec.then['redirect-nexthop'] = flowspec_redirect_nexthop6;
               break;
           }
+          break;
+        case 'ipaction':
+          ctl.flowspec.then['redirect-action-ip'] = flowspec_redirect_ipaction;
           break;
       }
       bgpFlowSpec(router_ip, ctl);
