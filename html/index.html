@@ -381,7 +381,6 @@
         <p>Using the <a href="https://hub.docker.com/r/sflow/ddos-protect">sflow/ddos-protect</a> image:</p>
         <pre class="bg-light"><code>docker run --net=host \
 -v $PWD/ddos.conf:/sflow-rt/ddos.conf \
---sysctl net.ipv4.ip_unprivileged_port_start=0 \
 sflow/ddos-protect -Dsystem.propertyFiles=ddos.conf -Dbgp.port=179</code></pre>
         <h5>Systemd</h5>
         <p>Edit the sflow-rt service</p>
