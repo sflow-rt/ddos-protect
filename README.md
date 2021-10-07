@@ -3,7 +3,7 @@
 Real-time detection of DDoS flood attacks. Automatically add BGP 
 remote triggered black hole (RTBH) and FlowSpec to mitigate attack.
 
-[Real-time DDoS mitigation using BGP RTBH and FlowSpec](https://blog.sflow.com/2020/02/real-time-ddos-mitigation-using-bgp.html)
+[DDoS protection quickstart guide](https://blog.sflow.com/2021/10/ddos-protection-quickstart-guide.html)
 
 ## To install
 
