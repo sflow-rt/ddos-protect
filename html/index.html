@@ -45,7 +45,7 @@
     <main class="container-fluid" role="main">
       <section id="charts">
         <div class="row">
-          <div class="col-lg-6">
+          <div class="col-lg-4">
             <div class="card mb-3">
               <h5 class="card-header">ip_flood<a href="#" class="badge badge-light float-right"><img src="img/barchart-fill.svg"></a></h5>
               <div class="card-body">
@@ -53,7 +53,7 @@
               </div>
             </div>
           </div>
-          <div class="col-lg-6">
+          <div class="col-lg-4">
             <div class="card mb-3">
               <h5 class="card-header">ip_fragmentation<a href="#" class="badge badge-light float-right"><img src="img/barchart-fill.svg"></a></h5>
               <div class="card-body">
@@ -61,35 +61,7 @@
               </div>
             </div>
           </div>
-        </div>
-        <div class="row">
-          <div class="col-lg-6">
-            <div class="card mb-3">
-              <h5 class="card-header">udp_flood<a href="#" class="badge badge-light float-right"><img src="img/barchart-fill.svg"></a></h5>
-              <div class="card-body">
-                <div id="udp-flood" class="trend"></div>
-              </div>
-            </div>
-          </div>
-          <div class="col-lg-6">
-            <div class="card mb-3">
-              <h5 class="card-header">udp_amplification<a href="#" class="badge badge-light float-right"><img src="img/barchart-fill.svg"></a></h5>
-              <div class="card-body">
-                <div id="udp-amplification" class="trend"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="row">
-          <div class="col-lg-6">
-            <div class="card mb-3">
-              <h5 class="card-header">tcp_flood<a href="#" class="badge badge-light float-right"><img src="img/barchart-fill.svg"></a></h5>
-              <div class="card-body">
-                <div id="tcp-flood" class="trend"></div>
-              </div>
-            </div>
-          </div>
-          <div class="col-lg-6">
+          <div class="col-lg-4">
             <div class="card mb-3">
               <h5 class="card-header">icmp_flood<a href="#" class="badge badge-light float-right"><img src="img/barchart-fill.svg"></a></h5>
               <div class="card-body">
@@ -99,7 +71,41 @@
           </div>
         </div>
         <div class="row">
-          <div class="col-lg-6">
+          <div class="col-lg-4">
+            <div class="card mb-3">
+              <h5 class="card-header">udp_flood<a href="#" class="badge badge-light float-right"><img src="img/barchart-fill.svg"></a></h5>
+              <div class="card-body">
+                <div id="udp-flood" class="trend"></div>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-4">
+            <div class="card mb-3">
+              <h5 class="card-header">udp_amplification<a href="#" class="badge badge-light float-right"><img src="img/barchart-fill.svg"></a></h5>
+              <div class="card-body">
+                <div id="udp-amplification" class="trend"></div>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-4">
+            <div class="card mb-3">
+              <h5 class="card-header">tcp_flood<a href="#" class="badge badge-light float-right"><img src="img/barchart-fill.svg"></a></h5>
+              <div class="card-body">
+                <div id="tcp-flood" class="trend"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-lg-4">
+            <div class="card mb-3">
+              <h5 class="card-header">tcp_amplification<a href="#" class="badge badge-light float-right"><img src="img/barchart-fill.svg"></a></h5>
+              <div class="card-body">
+                <div id="tcp-amplification" class="trend"></div>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-4">
             <div class="card mb-3">
               <h5 class="card-header">Controls</h5>
               <div class="card-body">
@@ -107,7 +113,7 @@
               </div>
             </div>
           </div>
-          <div class="col-lg-6">
+          <div class="col-lg-4">
             <div class="card mb-3">
               <h5 class="card-header">BGP</h5>
               <div class="card-body">
@@ -223,6 +229,12 @@
                     <td></td>
                   </tr>
                   <tr>
+                    <th scope="row">icmp_flood</th>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                  </tr>
+                  <tr>
                     <th scope="row">udp_flood</th>
                     <td></td>
                     <td></td>
@@ -241,7 +253,7 @@
                     <td></td>
                   </tr>
                   <tr>
-                    <th scope="row">icmp_flood</th>
+                    <th scope="row">tcp_amplification</th>
                     <td></td>
                     <td></td>
                     <td></td>
@@ -452,10 +464,11 @@ AmbientCapabilities=CAP_NET_BIND_SERVICE</code></pre>
             <tbody>
               <tr><th>ip_flood</th><td>IP packets by target address and protocol</tr>
               <tr><th>ip_fragmentation</th><td>IP fragments by target address and protocol</tr>
+              <tr><th>icmp_flood</th><td>ICMP packets by target address and type</td></tr>
               <tr><th>udp_flood</th><td>UDP packets by target address and destination port</em></tr>
               <tr><th>udp_amplification</th><td>UDP packets by target address and source port</td></tr>
               <tr><th>tcp_flood</th><td>TCP packets by target address and destination port</td></tr>
-              <tr><th>icmp_flood</th><td>ICMP packets by target address and type</td></tr>
+              <tr><th>tcp_amplification</th><td>TCP SYN-ACK packets by target address and source port</td></tr>
             <tbody>
           </table>
         </div>
@@ -534,6 +547,9 @@ AmbientCapabilities=CAP_NET_BIND_SERVICE</code></pre>
               <tr><td>ddos_protect.icmp_flood.action</td><td>ignore</td><td>Default action: <em>ignore</em>, <em>drop</em>, <em>filter</em>, <em>mark</em>, or <em>limit</em></td></tr>
               <tr><td>ddos_protect.icmp_flood.threshold</td><td>500000</td><td>Default threshold (in Packets per Second)</td></tr>
               <tr><td>ddos_protect.icmp_flood.timeout</td><td>60</td><td>Default period to maintain action (in Minutes)</td></tr>
+              <tr><td>ddos_protect.tcp_amplification.action</td><td>ignore</td><td>Default action: <em>ignore</em>, <em>drop</em>, <em>filter</em>, <em>mark</em>, or <em>limit</em></td></tr>
+              <tr><td>ddos_protect.tcp_amplification.threshold</td><td>500000</td><td>Default threshold (in Packets per Second)</td></tr>
+              <tr><td>ddos_protect.tcp_amplification.timeout</td><td>60</td><td>Default period to maintain action (in Minutes)</td></tr>
               <tr><td>ddos_protect.tcp_flood.action</td><td>ignore</td><td>Default action: <em>ignore</em>, <em>drop</em>, <em>filter</em>, <em>mark</em>, or <em>limit</em></td></tr>
               <tr><td>ddos_protect.tcp_flood.threshold</td><td>500000</td><td>Default threshold (in Packets per Second)</td></tr>
               <tr><td>ddos_protect.tcp_flood.timeout</td><td>60</td><td>Default period to maintain action (in Minutes)</td></tr>
@@ -559,7 +575,7 @@ AmbientCapabilities=CAP_NET_BIND_SERVICE</code></pre>
     </main>
     <footer class="footer page-footer border-top mt-3">
        <div class="footer-copyright text-center py-2">
-         <small class="text-muted">Copyright &copy; 2015-2021 InMon Corp. ALL RIGHTS RESERVED</small>
+         <small class="text-muted">Copyright &copy; 2015-2022 InMon Corp. ALL RIGHTS RESERVED</small>
        </div>
     </footer>
   </body>

@@ -136,6 +136,16 @@ $(function() {
     hrule: [{name:'threshold_tcp_flood',color:colors[1],scale:showThreshold}],
     units: 'Packets per Second'},
   db);
+  $('#tcp-amplification').chart({
+    type: 'topn',
+    stack: false,
+    includeOther: false,
+    metric: 'top-5-tcp-amplification',
+    legendHeadings: ['Target','Group','Port'],
+    keyName: (key,idx) => idx == 2 ? label(key,ports) : key,
+    hrule: [{name:'threshold_tcp_amplification',color:colors[1],scale:showThreshold}],
+    units: 'Packets per Second'},
+  db);
   $('#icmp-flood').chart({
     type: 'topn',
     stack: false,

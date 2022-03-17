@@ -1,8 +1,8 @@
 // author: InMon
-// version: 2.2
-// date: 2/18/2021
+// version: 2.3
+// date: 3/16/2022
 // description: Use BGP to mitigate DDoS flood attacks
-// copyright: Copyright (c) 2015-2021 InMon Corp.
+// copyright: Copyright (c) 2015-2022 InMon Corp.
 
 include(scriptdir()+'/inc/trend.js');
 
@@ -91,6 +91,7 @@ var defaultSettings = {
   icmp_flood:{threshold:500000, timeout:60, action:'ignore'},
   udp_amplification:{threshold:500000, timeout:60, action:'ignore'},
   udp_flood:{threshold:500000, timeout:60, action:'ignore'},
+  tcp_amplification:{threshold:500000, timeout:60, action:'ignore'},
   tcp_flood:{threshold:500000, timeout:60, action:'ignore'}
 };
 Object.keys(defaultSettings).forEach(function(key) {
@@ -99,7 +100,7 @@ Object.keys(defaultSettings).forEach(function(key) {
   val.timeout = getSystemProperty('ddos_protect.'+key+'.timeout') || val.timeout;
   val.action = getSystemProperty('ddos_protect.'+key+'.action') || val.action;
 });
-var settings = storeGet('settings') || defaultSettings;
+var settings = Object.assign(defaultSettings, storeGet('settings'));
 
 var controls = {};
 
@@ -381,6 +382,13 @@ setFlow('ddos_protect_tcp_flood', {
   filter:'ipprotocol=6&'+filter,
   t:flow_t
 });
+setFlow('ddos_protect_tcp_amplification', {
+  keys:keys+',tcpsourceport',
+  value:value,
+  values:values,
+  filter:'ipprotocol=6&tcpflags~....1..1.&'+filter,
+  t:flow_t
+});
 
 // IPv6 attacks
 var keys6 = 'ip6destination,group:ip6destination:ddos_protect';
@@ -436,6 +444,13 @@ setFlow('ddos_protect_tcp6_flood', {
   filter:'ip6nexthdr=6&'+filter6,
   t:flow_t
 });
+setFlow('ddos_protect_tcp6_amplification', {
+  keys:keys6+',tcpsourceport',
+  value:value,
+  values:values6,
+  filter:'ip6nexthdr=6&tcpflags~....1..1.&'+filter6,
+  t:flow_t
+});
 
 function setThresholds() {
   setThreshold('ddos_protect_ip_flood',
@@ -455,7 +470,13 @@ function setThresholds() {
   );
   setThreshold('ddos_protect_tcp6_flood',
     {metric:'ddos_protect_tcp6_flood', value:settings.tcp_flood.threshold, byFlow:true, timeout:threshold_t}
-  )
+  );
+  setThreshold('ddos_protect_tcp_amplification',
+    {metric:'ddos_protect_tcp_amplification', value:settings.tcp_amplification.threshold, byFlow:true, timeout:threshold_t}
+  );
+  setThreshold('ddos_protect_tcp6_amplification',
+    {metric:'ddos_protect_tcp6_amplification', value:settings.tcp_amplification.threshold, byFlow:true, timeout:threshold_t}
+  );
   setThreshold('ddos_protect_udp_flood',
     {metric:'ddos_protect_udp_flood', value:settings.udp_flood.threshold, byFlow:true, timeout:threshold_t}
   );
@@ -630,6 +651,28 @@ setEventHandler(function(evt) {
         'destination-port':'='+protocol
       };
       break;
+    case 'ddos_protect_tcp_amplification':
+      ctl.attack = 'tcp_amplification';
+      ctl.ipversion = '4';
+      ctl.flowspec.match = {
+        destination:target,
+        version:'4',
+        protocol:'=6',
+        'tcp-flags':'=SA',
+        'source-port':'='+protocol
+      };
+      break;
+    case 'ddos_protect_tcp6_amplification':
+      ctl.attack = 'tcp_amplification';
+      ctl.ipversion = '6';
+      ctl.flowspec.match = {
+        destination:target,
+        version:'6',
+        protocol:'=6',
+        'tcp-flags':'=SA',
+        'source-port':'='+protocol
+      };
+      break;
     case 'ddos_protect_udp_flood':
       ctl.attack = 'udp_flood';
       ctl.ipversion = '4';
@@ -699,6 +742,8 @@ setEventHandler(function(evt) {
  'ddos_protect_icmp6_flood',
  'ddos_protect_tcp_flood',
  'ddos_protect_tcp6_flood',
+ 'ddos_protect_tcp_amplification',
+ 'ddos_protect_tcp6_amplification',
  'ddos_protect_udp_flood',
  'ddos_protect_udp6_flood',
  'ddos_protect_udp_amplification',
@@ -738,6 +783,7 @@ setIntervalHandler(function(now) {
   points['top-5-udp-amplification'] = calculateTopN(['ddos_protect_udp_amplification','ddos_protect_udp6_amplification'],5,1);
   points['top-5-icmp-flood'] = calculateTopN(['ddos_protect_icmp_flood','ddos_protect_icmp6_flood'],5,1);
   points['top-5-tcp-flood'] = calculateTopN(['ddos_protect_tcp_flood','ddos_protect_tcp6_flood'],5,1);
+  points['top-5-tcp-amplification'] = calculateTopN(['ddos_protect_tcp_amplification','ddos_protect_tcp6_amplification'],5,1);
   trend.addPoints(now,points);
 
   for(var key in controls) {
