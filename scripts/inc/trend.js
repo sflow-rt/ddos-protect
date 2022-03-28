@@ -2,7 +2,7 @@ function Trend(maxPoints, stepSize) {
   this.maxPoints = maxPoints;
   this.trends = {};
   this.times = new Array(maxPoints);
-  var i, t = (new Date()).getTime(), stepMs = stepSize * 1000;
+  var i, t = Date.now(), stepMs = stepSize * 1000;
   for(i = maxPoints - 1; i >= 0; i--) { t -= stepMs; this.times[i] = t; }
 }
 

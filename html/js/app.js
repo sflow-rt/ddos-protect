@@ -500,8 +500,8 @@ $(function() {
     if(db.trend) {
       // merge in new data
       var maxPoints = db.trend.maxPoints;
-      var remove = db.trend.times.length > maxPoints ? db.trend.times.length - maxPoints : 0;
       db.trend.times = db.trend.times.concat(data.trend.times);
+      var remove = db.trend.times.length > maxPoints ? db.trend.times.length - maxPoints : 0;
       if(remove) db.trend.times = db.trend.times.slice(remove);
       for(var name in db.trend.trends) {
         db.trend.trends[name] = db.trend.trends[name].concat(data.trend.trends[name]);
