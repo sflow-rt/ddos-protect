@@ -564,6 +564,8 @@ AmbientCapabilities=CAP_NET_BIND_SERVICE</code></pre>
               <tr><td>ddos_protect.threshold_seconds</td><td>60</td><td>Hold time for threshold before it will re-trigger</td></tr>
               <tr><td>ddos_protect.esr</td><td>no</td><td>Ignore event if there are insufficient samples for an accurate reading</td></tr>
               <tr><td>ddos_protect.esr_samples</td><td>15</td><td>Minimum number of samples required to trigger threshold</td></tr>
+              <tr><td>ddos_protect.scf</td><td>no</td><td>Ignore event if there are too few traffic sources</td></tr>
+              <tr><td>ddos_protect.scf_sources</td><td>10</td><td>Minimum number of traffic sources required to trigger threshold</td><tr>
               <tr><td>ddos_protect.syslog.host</td><td></td><td>Comma separated list of syslog collector IP addresses</td></tr>
               <tr><td>ddos_protect.syslog.port</td><td>514</td><td>UDP port for syslog events</td></tr>
               <tr><td>ddos_protect.syslog.facility</td><td>16</td><td>Syslog facility, default <em>local0</em></td></tr>

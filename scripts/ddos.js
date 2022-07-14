@@ -1,6 +1,6 @@
 // author: InMon
-// version: 2.3
-// date: 3/16/2022
+// version: 2.4
+// date: 7/14/2022
 // description: Use BGP to mitigate DDoS flood attacks
 // copyright: Copyright (c) 2015-2022 InMon Corp.
 
@@ -34,6 +34,8 @@ var flowspec_community = getSystemProperty("ddos_protect.flowspec.community") ||
 
 var effectiveSamplingRateFlag = getSystemProperty("ddos_protect.esr") === 'yes';
 var effectiveSamplingRateThreshold = getSystemProperty("ddos_protect.esr_samples") || '15';
+var sourceCountFilterFlag = getSystemProperty("ddos_protect.scf") === 'yes';
+var sourceCountFilterThreshold = getSystemProperty("ddos_protect.scf_sources") || '10';
 var flow_t = getSystemProperty("ddos_protect.flow_seconds") || '2';
 var threshold_t = getSystemProperty("ddos_protect.threshold_seconds") || '60';
 
@@ -569,13 +571,21 @@ setEventHandler(function(evt) {
     if(!dsInfo) return;
     let rate = dsInfo.effectiveSamplingRate;
     if(!rate || flow_t * evt.threshold / rate < effectiveSamplingRateThreshold) {
-      logWarning("DDoS effectiveSampling rate "+rate+" too high for "+evt.agent);
+      logWarning("DDoS effectiveSamplingRate "+rate+" too high for "+evt.agent);
       return;
     }
   }
 
   var [target,group,protocol] = evt.flowKey.split(',');
   var [attackers,packetsize] = evt.values ? evt.values : [0,0];
+
+  // avoid false positives by ignoring events with small number of attackers
+  if(sourceCountFilterFlag && attackers > 0) {
+    if(attackers < sourceCountFilterThreshold) {
+      logWarning("DDoS source count "+attackers+" too small for "+evt.thresholdID+" "+target+" "+group+" "+protocol);
+      return;
+    } 
+  }
 
   var ctl = {
     id:'c' + idx++,
