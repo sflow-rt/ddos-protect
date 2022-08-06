@@ -283,6 +283,8 @@ $(function() {
         $(cells[1]).html(vals.action);
         $(cells[2]).html(vals.threshold);
         $(cells[3]).html(vals.timeout);
+        $(cells[4]).html(vals.include || '');
+        $(cells[5]).html(vals.exclude || '');
         switch(vals.action) {
           case 'drop':
             row.addClass('table-danger');
@@ -463,17 +465,22 @@ $(function() {
     dialog.find('#setting-action').val($(row.children()[1]).html());
     dialog.find('#setting-threshold').val($(row.children()[2]).html());
     dialog.find('#setting-timeout').val($(row.children()[3]).html());
+    dialog.find('#setting-include').val($(row.children()[4]).html());
+    dialog.find('#setting-exclude').val($(row.children()[5]).html());
     dialog.modal('show');
   });
 
   $('#setting-submit').click(function() {
     var dialog = $('#setting-dialog');
     var attack = dialog.find('#setting-attack').html();
-    var action = dialog.find('#setting-action').val();
-    var threshold = dialog.find('#setting-threshold').val();
-    var timeout = dialog.find('#setting-timeout').val();
     var msg = {};
-    msg[attack] = {action:action,threshold:threshold,timeout:timeout};
+    msg[attack] = {
+      action:dialog.find('#setting-action').val(),
+      threshold:dialog.find('#setting-threshold').val(),
+      timeout:dialog.find('#setting-timeout').val(),
+      include:dialog.find('#setting-include').val(),
+      exclude:dialog.find('#setting-exclude').val()
+    };
     $.ajax({
       url:settingsURL,
       type:'POST',

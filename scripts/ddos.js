@@ -1,6 +1,6 @@
 // author: InMon
-// version: 2.4
-// date: 7/14/2022
+// version: 2.5
+// date: 8/5/2022
 // description: Use BGP to mitigate DDoS flood attacks
 // copyright: Copyright (c) 2015-2022 InMon Corp.
 
@@ -88,19 +88,19 @@ getSystemPropertyNames()
 var groups = storeGet('groups') || defaultGroups;
 
 var defaultSettings = {
-  ip_flood:{threshold:1000000, timeout:180, action:'ignore'},
-  ip_fragmentation:{threshold:500000, timeout:60, action:'ignore'},
-  icmp_flood:{threshold:500000, timeout:60, action:'ignore'},
-  udp_amplification:{threshold:500000, timeout:60, action:'ignore'},
-  udp_flood:{threshold:500000, timeout:60, action:'ignore'},
-  tcp_amplification:{threshold:500000, timeout:60, action:'ignore'},
-  tcp_flood:{threshold:500000, timeout:60, action:'ignore'}
+  ip_flood:{threshold:1000000, timeout:180, action:'ignore', include:'', exclude:''},
+  ip_fragmentation:{threshold:500000, timeout:60, action:'ignore', include:'', exclude:''},
+  icmp_flood:{threshold:500000, timeout:60, action:'ignore', include:'', exclude:''},
+  udp_amplification:{threshold:500000, timeout:60, action:'ignore', include:'', exclude:''},
+  udp_flood:{threshold:500000, timeout:60, action:'ignore', include:'', exclude:''},
+  tcp_amplification:{threshold:500000, timeout:60, action:'ignore', include:'', exclude:''},
+  tcp_flood:{threshold:500000, timeout:60, action:'ignore', include:'', exclude:''}
 };
 Object.keys(defaultSettings).forEach(function(key) {
-  var val = defaultSettings[key];
-  val.threshold = getSystemProperty('ddos_protect.'+key+'.threshold') || val.threshold;
-  val.timeout = getSystemProperty('ddos_protect.'+key+'.timeout') || val.timeout;
-  val.action = getSystemProperty('ddos_protect.'+key+'.action') || val.action;
+  var entry = defaultSettings[key];
+  Object.keys(entry).forEach(function(attr) {
+    entry[attr] = getSystemProperty('ddos_protect.'+key+'.'+attr) || entry[attr];
+  });
 });
 var settings = Object.assign(defaultSettings, storeGet('settings'));
 
@@ -325,134 +325,145 @@ function configureGroups(groups) {
 
 configureGroups(groups);
 
-// IPv4 attacks
-var keys = 'ipdestination,group:ipdestination:ddos_protect';
-var filter = 'first:stack:.:ip:ip6=ip';
-var value = 'frames';
-var values = 'count:ipsource,avg:ipbytes';
-var bgpExcludedGroups;
-if(bgpGroup) {
-  filter += '&eq:bgpsourceas:bgpas=false&eq:bgpdestinationas:bgpas=true';
-
-  // remove the external group from excluded groups since internal / external determination made via BGP
-  bgpExcludedGroups = excludedGroups.split(',').filter(group => !externalGroupSet.has(group)).join(',');
-  if(bgpExcludedGroups) {
-    filter += '&group:ipdestination:ddos_protect!='+bgpExcludedGroups;
-  } 
-} else {
-  filter += '&group:ipsource:ddos_protect='+externalGroup+'&group:ipdestination:ddos_protect!='+excludedGroups;
+function protocolFilter(filter,key,setting) {
+  var result = filter;
+  if(setting.include) result = key+'='+setting.include+'&'+result;
+  if(setting.exclude) result = key+'!='+setting.exclude+'&'+result;
+  return result;
 }
-setFlow('ddos_protect_ip_flood', {
-  keys: keys+',ipprotocol',
-  value:value,
-  values:values,
-  filter:filter,
-  t:flow_t
-});
-setFlow('ddos_protect_ip_fragmentation', {
-  keys: keys+',ipprotocol',
-  value:value,
-  values:values,
-  filter:'(ipflags=001|range:ipfragoffset:1=true)&'+filter,
-  t:flow_t
-});
-setFlow('ddos_protect_udp_amplification', {
-  keys:keys+',udpsourceport',
-  value:value,
-  values:values,
-  filter:'ipprotocol=17&'+filter,
-  t:flow_t
-});
-setFlow('ddos_protect_udp_flood', {
-  keys:keys+',udpdestinationport',
-  value:value,
-  values:values,
-  filter:'ipprotocol=17&'+filter,
-  t:flow_t
-});
-setFlow('ddos_protect_icmp_flood', {
-  keys:keys+',icmptype',
-  value:value,
-  values:values,
-  filter:'ipprotocol=1&'+filter,
-  t:flow_t
-});
-setFlow('ddos_protect_tcp_flood', {
-  keys:keys+',tcpdestinationport',
-  value:value,
-  values:values,
-  filter:'ipprotocol=6&'+filter,
-  t:flow_t
-});
-setFlow('ddos_protect_tcp_amplification', {
-  keys:keys+',tcpsourceport',
-  value:value,
-  values:values,
-  filter:'ipprotocol=6&tcpflags~....1..1.&'+filter,
-  t:flow_t
-});
 
-// IPv6 attacks
-var keys6 = 'ip6destination,group:ip6destination:ddos_protect';
-var values6 = 'count:ip6source,avg:ip6bytes';
-var filter6 = 'first:stack:.:ip:ip6=ip6';
-if(bgpGroup) {
-  filter6 += '&eq:bgpsourceas:bgpas=false&eq:bgpdestinationas:bgpas=true';
-  if(bgpExcludedGroups) { 
-    filter6 += '&group:ip6destination:ddos_protect!='+bgpExcludedGroups;
+function setFlows() {
+  // IPv4 attacks
+  var keys = 'ipdestination,group:ipdestination:ddos_protect';
+  var filter = 'first:stack:.:ip:ip6=ip';
+  var value = 'frames';
+  var values = 'count:ipsource,avg:ipbytes';
+  var bgpExcludedGroups;
+  if(bgpGroup) {
+    filter += '&eq:bgpsourceas:bgpas=false&eq:bgpdestinationas:bgpas=true';
+
+    // remove the external group from excluded groups since internal / external determination made via BGP
+    bgpExcludedGroups = excludedGroups.split(',').filter(group => !externalGroupSet.has(group)).join(',');
+    if(bgpExcludedGroups) {
+      filter += '&group:ipdestination:ddos_protect!='+bgpExcludedGroups;
+    } 
+  } else {
+    filter += '&group:ipsource:ddos_protect='+externalGroup+'&group:ipdestination:ddos_protect!='+excludedGroups;
   }
-} else {
-  filter6 += '&group:ip6source:ddos_protect='+externalGroup+'&group:ip6destination:ddos_protect!='+excludedGroups;
+  setFlow('ddos_protect_ip_flood', {
+    keys: keys+',ipprotocol',
+    value:value,
+    values:values,
+    filter:protocolFilter(filter,'ipprotocol',settings.ip_flood),
+    t:flow_t
+  });
+  setFlow('ddos_protect_ip_fragmentation', {
+    keys: keys+',ipprotocol',
+    value:value,
+    values:values,
+    filter:protocolFilter('(ipflags=001|range:ipfragoffset:1=true)&'+filter,'ipprotocol',settings.ip_fragmentation),
+    t:flow_t
+  });
+  setFlow('ddos_protect_udp_amplification', {
+    keys:keys+',udpsourceport',
+    value:value,
+    values:values,
+    filter:protocolFilter('ipprotocol=17&'+filter,'udpsourceport',settings.udp_amplification),
+    t:flow_t
+  });
+  setFlow('ddos_protect_udp_flood', {
+    keys:keys+',udpdestinationport',
+    value:value,
+    values:values,
+    filter:protocolFilter('ipprotocol=17&'+filter,'udpdestinationport',settings.udp_flood),
+    t:flow_t
+  });
+  setFlow('ddos_protect_icmp_flood', {
+    keys:keys+',icmptype',
+    value:value,
+    values:values,
+    filter:protocolFilter('ipprotocol=1&'+filter,'icmptype',settings.icmp_flood),
+    t:flow_t
+  });
+  setFlow('ddos_protect_tcp_flood', {
+    keys:keys+',tcpdestinationport',
+    value:value,
+    values:values,
+    filter:protocolFilter('ipprotocol=6&'+filter,'tcpdestinationport',settings.tcp_flood),
+    t:flow_t
+  });
+  setFlow('ddos_protect_tcp_amplification', {
+    keys:keys+',tcpsourceport',
+    value:value,
+    values:values,
+    filter:protocolFilter('ipprotocol=6&tcpflags~....1..1.&'+filter,'tcpsourceport',settings.tcp_amplification),
+    t:flow_t
+  });
+
+  // IPv6 attacks
+  var keys6 = 'ip6destination,group:ip6destination:ddos_protect';
+  var values6 = 'count:ip6source,avg:ip6bytes';
+  var filter6 = 'first:stack:.:ip:ip6=ip6';
+  if(bgpGroup) {
+    filter6 += '&eq:bgpsourceas:bgpas=false&eq:bgpdestinationas:bgpas=true';
+    if(bgpExcludedGroups) { 
+      filter6 += '&group:ip6destination:ddos_protect!='+bgpExcludedGroups;
+    }
+  } else {
+    filter6 += '&group:ip6source:ddos_protect='+externalGroup+'&group:ip6destination:ddos_protect!='+excludedGroups;
+  }
+  setFlow('ddos_protect_ip6_flood', {
+    keys: keys6+',ip6nexthdr',
+    value:value,
+    values:values6,
+    filter:protocolFilter(filter6,'ip6nexthdr',settings.ip_flood),
+    t:flow_t
+  });
+  setFlow('ddos_protect_ip6_fragmentation', {
+    keys: keys6+',ip6nexthdr',
+    value:value,
+    values:values6,
+    filter:protocolFilter('(ip6fragm=yes|range:ip6fragoffset:1=true)&'+filter6,'ip6nexthdr',settings.ip_fragmentation),
+    t:flow_t
+  });
+  setFlow('ddos_protect_udp6_amplification', {
+    keys:keys6+',udpsourceport',
+    value:value,
+    values:values6,
+    filter:protocolFilter('ip6nexthdr=17&'+filter6,'udpsourceport',settings.udp_amplification),
+    t:flow_t
+  });
+  setFlow('ddos_protect_udp6_flood', {
+    keys:keys6+',udpdestinationport',
+    value:value,
+    values:values6,
+    filter:protocolFilter('ip6nexthdr=17&'+filter6,'udpdestinationport',settings.udp_flood),
+    t:flow_t
+  });
+  setFlow('ddos_protect_icmp6_flood', {
+    keys:keys6+',icmp6type',
+    value:value,
+    values:values6,
+    filter:protocolFilter('ip6nexthdr=58&'+filter6,'icmp6type',settings.icmp_flood),
+    t:flow_t
+  });
+  setFlow('ddos_protect_tcp6_flood', {
+    keys:keys6+',tcpdestinationport',
+    value:value,
+    values:values6,
+    filter:protocolFilter('ip6nexthdr=6&'+filter6,'tcpdestinationport',settings.tcp_flood),
+    t:flow_t
+  });
+  setFlow('ddos_protect_tcp6_amplification', {
+    keys:keys6+',tcpsourceport',
+    value:value,
+    values:values6,
+    filter:protocolFilter('ip6nexthdr=6&tcpflags~....1..1.&'+filter6,'tcpsourceport',settings.tcp_amplification),
+    t:flow_t
+  });
 }
-setFlow('ddos_protect_ip6_flood', {
-  keys: keys6+',ip6nexthdr',
-  value:value,
-  values:values6,
-  filter:filter6,
-  t:flow_t
-});
-setFlow('ddos_protect_ip6_fragmentation', {
-  keys: keys6+',ip6nexthdr',
-  value:value,
-  values:values6,
-  filter:'(ip6fragm=yes|range:ip6fragoffset:1=true)&'+filter6,
-  t:flow_t
-});
-setFlow('ddos_protect_udp6_amplification', {
-  keys:keys6+',udpsourceport',
-  value:value,
-  values:values6,
-  filter:'ip6nexthdr=17&'+filter6,
-  t:flow_t
-});
-setFlow('ddos_protect_udp6_flood', {
-  keys:keys6+',udpdestinationport',
-  value:value,
-  values:values6,
-  filter:'ip6nexthdr=17&'+filter6,
-  t:flow_t
-});
-setFlow('ddos_protect_icmp6_flood', {
-  keys:keys6+',icmp6type',
-  value:value,
-  values:values6,
-  filter:'ip6nexthdr=58&'+filter6,
-  t:flow_t
-});
-setFlow('ddos_protect_tcp6_flood', {
-  keys:keys6+',tcpdestinationport',
-  value:value,
-  values:values6,
-  filter:'ip6nexthdr=6&'+filter6,
-  t:flow_t
-});
-setFlow('ddos_protect_tcp6_amplification', {
-  keys:keys6+',tcpsourceport',
-  value:value,
-  values:values6,
-  filter:'ip6nexthdr=6&tcpflags~....1..1.&'+filter6,
-  t:flow_t
-});
+
+setFlows();
 
 function setThresholds() {
   setThreshold('ddos_protect_ip_flood',
@@ -811,35 +822,46 @@ function updateSettings(vals) {
       let newEntry = {};
       for(param in entry) {
         let val = vals[attack][param];
-        if(val) {
-          switch(param) {
-            case 'action':
-              if('ignore' === val
-                 || 'drop' === val
-                 || 'filter' === val
-                 || 'mark' === val
-                 || 'limit' === val
-                 || 'redirect' === val
-                 || 'community' === val) {
-                newEntry[param] = val;
+        switch(param) {
+          case 'action':
+            if('ignore' === val
+               || 'drop' === val
+               || 'filter' === val
+               || 'mark' === val
+               || 'limit' === val
+               || 'redirect' === val
+               || 'community' === val) {
+              newEntry[param] = val;
+            } else {
+              return false;
+            }
+            break;
+          case 'threshold':
+          case 'timeout':
+            if(0 <= val) {
+              newEntry[param] = val;
+            } else {
+              return false;
+            }
+            break;
+          case 'include':
+          case 'exclude':
+            if(!val) {
+              newEntry[param] = '';
+            } else {
+              let newVal = String(val).replace(/\s/g, '');
+              if(newVal.length === 0 || newVal.match(/^\d+(,\d+)*$/)) {
+                newEntry[param] = newVal;
               } else {
                 return false;
               }
-              break;
-            case 'threshold':
-            case 'timeout':
-              if(0 <= val) {
-                newEntry[param] = val;
-              } else {
-                return false;
-              }
-              break;
-          }
-        } else {
-          newEntry[param] = entry[param];
+            }
+            break;
+          default:
+            newEntry[param] = entry[param];
         }
       }
-      newSettings[attack] = newEntry;  
+      newSettings[attack] = newEntry;
     } else {
       newSettings[attack] = entry;
     }
@@ -847,6 +869,7 @@ function updateSettings(vals) {
   settingsUpdate++;
   settings = newSettings;
   storeSet('settings',settings);
+  setFlows();
   setThresholds();
   return true; 
 }

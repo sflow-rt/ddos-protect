@@ -205,7 +205,7 @@
         <div class="card mb-3">
           <div class="card-header">Attack Mitigation</div>
           <div class="card-body">
-            <div class="table-responsive-sm">
+            <div class="table-responsive-md">
               <table id="settingstable" class="table table-bordered table-hover table-sm">
                 <thead class="thead-light">
                   <tr>
@@ -213,11 +213,15 @@
                     <th scope="col">Action</th>
                     <th scope="col">Threshold</th>
                     <th scope="col">Timeout</th>
+                    <th scope="col">Include</th>
+                    <th scope="col">Exclude</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr>
                     <th scope="row">ip_flood</th>
+                    <td></td>
+                    <td></td>
                     <td></td>
                     <td></td>
                     <td></td>
@@ -227,9 +231,13 @@
                     <td></td>
                     <td></td>
                     <td></td>
+                    <td></td>
+                    <td></td>
                   </tr>
                   <tr>
                     <th scope="row">icmp_flood</th>
+                    <td></td>
+                    <td></td>
                     <td></td>
                     <td></td>
                     <td></td>
@@ -239,9 +247,13 @@
                     <td></td>
                     <td></td>
                     <td></td>
+                    <td></td>
+                    <td></td>
                   </tr>
                   <tr>
                     <th scope="row">udp_amplification</th>
+                    <td></td>
+                    <td></td>
                     <td></td>
                     <td></td>
                     <td></td>
@@ -251,9 +263,13 @@
                     <td></td>
                     <td></td>
                     <td></td>
+                    <td></td>
+                    <td></td>
                   </tr>
                   <tr>
                     <th scope="row">tcp_amplification</th>
+                    <td></td>
+                    <td></td>
                     <td></td>
                     <td></td>
                     <td></td>
@@ -295,6 +311,14 @@
                      <div class="form-group row">
                        <div class="col-4 col-form-label text-right font-weight-bold">Timeout</div>
                        <div class="col-8"><input type="number" min="0" id="setting-timeout" class="form-control"></input></div>
+                     </div>
+                     <div class="form-group row">
+                       <div class="col-4 col-form-label text-right font-weight-bold">Include</div>
+                       <div class="col-8"><input type="text" id="setting-include" class="form-control" placeholder="List of protocols"></input></div>
+                     </div>
+                     <div class="form-group row">
+                       <div class="col-4 col-form-label text-right font-weight-bold">Exclude</div>
+                       <div class="col-8"><input type="text" id="setting-exclude" class="form-control" placeholder="List of protocols"></input></div>
                      </div>
                    </div>
                    <div class="modal-footer">
@@ -541,24 +565,38 @@ AmbientCapabilities=CAP_NET_BIND_SERVICE</code></pre>
               <tr><td>ddos_protect.ip_flood.action</td><td>ignore</td><td>Default action: <em>ignore</em>, <em>drop</em>, <em>filter</em>, <em>mark</em>, or <em>limit</em></td></tr>
               <tr><td>ddos_protect.ip_flood.threshold</td><td>1000000</td><td>Default threshold (in Packets per Second)</td></tr>
               <tr><td>ddos_protect.ip_flood.timeout</td><td>180</td><td>Default period to maintain action (in Minutes)</td></tr>
+              <tr><td>ddos_protect.ip_flood.include</td><td></td><td>Default list of IP protocols to include, empty list includes all</td></tr>
+              <tr><td>ddos_protect.ip_flood.exclude</td><td></td><td>Default list of IP protocols to exclude</td></tr>
               <tr><td>ddos_protect.ip_fragmentation.action</td><td>ignore</td><td>Default action: <em>ignore</em>, <em>drop</em>, <em>filter</em>, <em>mark</em>, or <em>limit</em></td></tr>
               <tr><td>ddos_protect.ip_fragmentation.threshold</td><td>500000</td><td>Default threshold (in Packets per Second)</td></tr>
               <tr><td>ddos_protect.ip_fragmentation.timeout</td><td>60</td><td>Default period to maintain action (in Minutes)</td></tr>
+              <tr><td>ddos_protect.ip_fragmentation.include</td><td></td><td>Default list of IP protocols to include, empty list includes all</td></tr>
+              <tr><td>ddos_protect.ip_fragmentation.exclude</td><td></td><td>Default list of IP protocols to exclude</td></tr>
               <tr><td>ddos_protect.icmp_flood.action</td><td>ignore</td><td>Default action: <em>ignore</em>, <em>drop</em>, <em>filter</em>, <em>mark</em>, or <em>limit</em></td></tr>
               <tr><td>ddos_protect.icmp_flood.threshold</td><td>500000</td><td>Default threshold (in Packets per Second)</td></tr>
               <tr><td>ddos_protect.icmp_flood.timeout</td><td>60</td><td>Default period to maintain action (in Minutes)</td></tr>
+              <tr><td>ddos_protect.icmp_flood.include</td><td></td><td>Default list of ICMP types to include, empty list includes all</td></tr>
+              <tr><td>ddos_protect.icmp_flood.exclude</td><td></td><td>Default list of ICMP types to exclude</td></tr>
               <tr><td>ddos_protect.tcp_amplification.action</td><td>ignore</td><td>Default action: <em>ignore</em>, <em>drop</em>, <em>filter</em>, <em>mark</em>, or <em>limit</em></td></tr>
               <tr><td>ddos_protect.tcp_amplification.threshold</td><td>500000</td><td>Default threshold (in Packets per Second)</td></tr>
               <tr><td>ddos_protect.tcp_amplification.timeout</td><td>60</td><td>Default period to maintain action (in Minutes)</td></tr>
+              <tr><td>ddos_protect.tcp_amplification.include</td><td></td><td>Default list of TCP ports to include, empty list includes all</td></tr>
+              <tr><td>ddos_protect.tcp_amplification.exclude</td><td></td><td>Default list of TCP ports to exclude</td></tr> 
               <tr><td>ddos_protect.tcp_flood.action</td><td>ignore</td><td>Default action: <em>ignore</em>, <em>drop</em>, <em>filter</em>, <em>mark</em>, or <em>limit</em></td></tr>
               <tr><td>ddos_protect.tcp_flood.threshold</td><td>500000</td><td>Default threshold (in Packets per Second)</td></tr>
               <tr><td>ddos_protect.tcp_flood.timeout</td><td>60</td><td>Default period to maintain action (in Minutes)</td></tr>
+              <tr><td>ddos_protect.tcp_flood.include</td><td></td><td>Default list of TCP ports to include, empty list includes all</td></tr>
+              <tr><td>ddos_protect.tcp_flood.exclude</td><td></td><td>Default list of TCP ports to exclude</td></tr>
               <tr><td>ddos_protect.udp_flood.action</td><td>ignore</td><td>Default action: <em>ignore</em>, <em>drop</em>, <em>filter</em>, <em>mark</em>, or <em>limit</em></td></tr>
               <tr><td>ddos_protect.udp_flood.threshold</td><td>500000</td><td>Default threshold (in Packets per Second)</td></tr>
               <tr><td>ddos_protect.udp_flood.timeout</td><td>60</td><td>Default period to maintain action (in Minutes)</td></tr>
+              <tr><td>ddos_protect.udp_flood.include</td><td></td><td>Default list of UDP ports to include, empty list includes all</td></tr>
+              <tr><td>ddos_protect.udp_flood.exclude</td><td></td><td>Default list of UDP ports to exclude</td></tr>
               <tr><td>ddos_protect.udp_amplification.action</td><td>ignore</td><td>Default action: <em>ignore</em>, <em>drop</em>, <em>filter</em>, <em>mark</em>, or <em>limit</em></td></tr>
               <tr><td>ddos_protect.udp_amplification.threshold</td><td>500000</td><td>Default threshold (in Packets per Second)</td></tr>
               <tr><td>ddos_protect.udp_amplification.timeout</td><td>60</td><td>Default period to maintain action (in Minutes)</td></tr>
+              <tr><td>ddos_protect.udp_amplification.include</td><td></td><td>Default list of UDP ports to include, empty list includes all</td></tr>
+              <tr><td>ddos_protect.udp_amplification.exclude</td><td></td><td>Default list of UDP ports to exclude</td></tr>
               <tr><td>ddos_protect.mode</td><td>manual</td><td>Default mitgation mode: <em>manual</em> or <em>automatic</em></td></tr>
               <tr><td>ddos_protect.flow_seconds</td><td>2</td><td>Moving average used to smooth flow rates</td></tr>
               <tr><td>ddos_protect.threshold_seconds</td><td>60</td><td>Hold time for threshold before it will re-trigger</td></tr>
