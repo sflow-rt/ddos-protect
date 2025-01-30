@@ -1,8 +1,8 @@
 // author: InMon
-// version: 2.5
-// date: 8/5/2022
+// version: 2.6
+// date: 1/30/2025
 // description: Use BGP to mitigate DDoS flood attacks
-// copyright: Copyright (c) 2015-2022 InMon Corp.
+// copyright: Copyright (c) 2015-2025 InMon Corp.
 
 include(scriptdir()+'/inc/trend.js');
 
@@ -310,6 +310,7 @@ routers.forEach(function(router,idx) {
 });
 
 function configureGroups(groups) {
+  if(groups && Object.keys(groups).some((x) => /[<&">]/.test(x))) return false;
   if(bgpGroup) {
     // replace external groups since these are learned via BGP
     let filtered = {};

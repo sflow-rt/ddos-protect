@@ -33,6 +33,8 @@ $(function() {
     e.preventDefault();
   });
 
+  $('.year').html((new Date()).getFullYear());
+
   var browseFlowsPage = '../../browse-flows/html/index.html';
   function openBrowseFlowsLink(id) {
     var trend = db.trend.trends['top-5-'+id];
@@ -342,7 +344,7 @@ $(function() {
     });
   }
   refreshSettings();
- 
+
   var groupInfo;
   function updateGroupsTable() {
     var body, i, names, name, entry, html = '', done = {};
