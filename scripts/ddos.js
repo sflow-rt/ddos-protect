@@ -1,6 +1,6 @@
 // author: InMon
-// version: 2.6
-// date: 1/30/2025
+// version: 2.7
+// date: 3/5/2025
 // description: Use BGP to mitigate DDoS flood attacks
 // copyright: Copyright (c) 2015-2025 InMon Corp.
 
@@ -32,8 +32,6 @@ var flowspec_redirect_nexthop6 = getSystemProperty("ddos_protect.flowspec.redire
 var flowspec_redirect_ipaction = getSystemProperty("ddos_protect.flowspec.redirect.ipaction") || '192.0.2.1';
 var flowspec_community = getSystemProperty("ddos_protect.flowspec.community") || '128:6:0'; // drop
 
-var effectiveSamplingRateFlag = getSystemProperty("ddos_protect.esr") === 'yes';
-var effectiveSamplingRateThreshold = getSystemProperty("ddos_protect.esr_samples") || '15';
 var sourceCountFilterFlag = getSystemProperty("ddos_protect.scf") === 'yes';
 var sourceCountFilterThreshold = getSystemProperty("ddos_protect.scf_sources") || '10';
 var flow_t = getSystemProperty("ddos_protect.flow_seconds") || '2';
@@ -352,17 +350,19 @@ function setFlows() {
     filter += '&group:ipsource:ddos_protect='+externalGroup+'&group:ipdestination:ddos_protect!='+excludedGroups;
   }
   setFlow('ddos_protect_ip_flood', {
-    keys: keys+',ipprotocol',
+    keys:keys+',ipprotocol',
     value:value,
     values:values,
     filter:protocolFilter(filter,'ipprotocol',settings.ip_flood),
+    aggMode:'AGENT',
     t:flow_t
   });
   setFlow('ddos_protect_ip_fragmentation', {
-    keys: keys+',ipprotocol',
+    keys:keys+',ipprotocol',
     value:value,
     values:values,
     filter:protocolFilter('(ipflags=001|range:ipfragoffset:1=true)&'+filter,'ipprotocol',settings.ip_fragmentation),
+    aggMode:'AGENT',
     t:flow_t
   });
   setFlow('ddos_protect_udp_amplification', {
@@ -370,6 +370,7 @@ function setFlows() {
     value:value,
     values:values,
     filter:protocolFilter('ipprotocol=17&'+filter,'udpsourceport',settings.udp_amplification),
+    aggMode:'AGENT',
     t:flow_t
   });
   setFlow('ddos_protect_udp_flood', {
@@ -377,6 +378,7 @@ function setFlows() {
     value:value,
     values:values,
     filter:protocolFilter('ipprotocol=17&'+filter,'udpdestinationport',settings.udp_flood),
+    aggMode:'AGENT',
     t:flow_t
   });
   setFlow('ddos_protect_icmp_flood', {
@@ -384,6 +386,7 @@ function setFlows() {
     value:value,
     values:values,
     filter:protocolFilter('ipprotocol=1&'+filter,'icmptype',settings.icmp_flood),
+    aggMode:'AGENT',
     t:flow_t
   });
   setFlow('ddos_protect_tcp_flood', {
@@ -391,6 +394,7 @@ function setFlows() {
     value:value,
     values:values,
     filter:protocolFilter('ipprotocol=6&'+filter,'tcpdestinationport',settings.tcp_flood),
+    aggMode:'AGENT',
     t:flow_t
   });
   setFlow('ddos_protect_tcp_amplification', {
@@ -398,6 +402,7 @@ function setFlows() {
     value:value,
     values:values,
     filter:protocolFilter('ipprotocol=6&tcpflags~....1..1.&'+filter,'tcpsourceport',settings.tcp_amplification),
+    aggMode:'AGENT',
     t:flow_t
   });
 
@@ -414,10 +419,11 @@ function setFlows() {
     filter6 += '&group:ip6source:ddos_protect='+externalGroup+'&group:ip6destination:ddos_protect!='+excludedGroups;
   }
   setFlow('ddos_protect_ip6_flood', {
-    keys: keys6+',ip6nexthdr',
+    keys:keys6+',ip6nexthdr',
     value:value,
     values:values6,
     filter:protocolFilter(filter6,'ip6nexthdr',settings.ip_flood),
+    aggMode:'AGENT',
     t:flow_t
   });
   setFlow('ddos_protect_ip6_fragmentation', {
@@ -425,6 +431,7 @@ function setFlows() {
     value:value,
     values:values6,
     filter:protocolFilter('(ip6fragm=yes|range:ip6fragoffset:1=true)&'+filter6,'ip6nexthdr',settings.ip_fragmentation),
+    aggMode:'AGENT',
     t:flow_t
   });
   setFlow('ddos_protect_udp6_amplification', {
@@ -432,6 +439,7 @@ function setFlows() {
     value:value,
     values:values6,
     filter:protocolFilter('ip6nexthdr=17&'+filter6,'udpsourceport',settings.udp_amplification),
+    aggMode:'AGENT',
     t:flow_t
   });
   setFlow('ddos_protect_udp6_flood', {
@@ -439,6 +447,7 @@ function setFlows() {
     value:value,
     values:values6,
     filter:protocolFilter('ip6nexthdr=17&'+filter6,'udpdestinationport',settings.udp_flood),
+    aggMode:'AGENT',
     t:flow_t
   });
   setFlow('ddos_protect_icmp6_flood', {
@@ -446,6 +455,7 @@ function setFlows() {
     value:value,
     values:values6,
     filter:protocolFilter('ip6nexthdr=58&'+filter6,'icmp6type',settings.icmp_flood),
+    aggMode:'AGENT',
     t:flow_t
   });
   setFlow('ddos_protect_tcp6_flood', {
@@ -453,6 +463,7 @@ function setFlows() {
     value:value,
     values:values6,
     filter:protocolFilter('ip6nexthdr=6&'+filter6,'tcpdestinationport',settings.tcp_flood),
+    aggMode:'AGENT',
     t:flow_t
   });
   setFlow('ddos_protect_tcp6_amplification', {
@@ -460,6 +471,7 @@ function setFlows() {
     value:value,
     values:values6,
     filter:protocolFilter('ip6nexthdr=6&tcpflags~....1..1.&'+filter6,'tcpsourceport',settings.tcp_amplification),
+    aggMode:'AGENT',
     t:flow_t
   });
 }
@@ -575,18 +587,6 @@ var idx = 0;
 setEventHandler(function(evt) {
   var key = evt.thresholdID+'-'+evt.flowKey;
   if(controls[key]) return;
-
-  // don't allow data from data sources with sampling rates close to threshold
-  // avoids false positives due the insufficient samples
-  if(effectiveSamplingRateFlag) {
-    let dsInfo = datasourceInfo(evt.agent,evt.dataSource);
-    if(!dsInfo) return;
-    let rate = dsInfo.effectiveSamplingRate;
-    if(!rate || flow_t * evt.threshold / rate < effectiveSamplingRateThreshold) {
-      logWarning("DDoS effectiveSamplingRate "+rate+" too high for "+evt.agent);
-      return;
-    }
-  }
 
   var [target,group,protocol] = evt.flowKey.split(',');
   var [attackers,packetsize] = evt.values ? evt.values : [0,0];
