@@ -1,8 +1,8 @@
 // author: InMon
-// version: 2.7
-// date: 3/5/2025
+// version: 2.8
+// date: 3/25/2026
 // description: Use BGP to mitigate DDoS flood attacks
-// copyright: Copyright (c) 2015-2025 InMon Corp.
+// copyright: Copyright (c) 2015-2026 InMon Corp.
 
 include(scriptdir()+'/inc/trend.js');
 
@@ -48,6 +48,7 @@ var syslogFacility = getSystemProperty("ddos_protect.syslog.facility") || '16'; 
 var syslogSeverity = getSystemProperty("ddos_protect.syslog.severity") || '5';  // notice
 
 const prometheus_prefix = getSystemProperty("prometheus.metric.prefix") || 'sflow_';
+const prometheus_type = getSystemProperty("prometheus.type") === 'yes';
 
 var routers = router.split(',');
 
@@ -877,10 +878,14 @@ function updateSettings(vals) {
 
 function prometheus() {
   var connections = routers.reduce((sum, router_ip) => sum + (bgpUp[router_ip] ? 1 : 0), 0);
-  var results = prometheus_prefix+'ddos_protect_controls{status="active"} '+(counts.blocked||0)+'\n';
+  var results = '';
+  if(prometheus_type) results += '# TYPE '+prometheus_prefix+'ddos_protect_controls gauge\n';
+  results += prometheus_prefix+'ddos_protect_controls{status="active"} '+(counts.blocked||0)+'\n';
   results += prometheus_prefix+'ddos_protect_controls{status="failed"} '+(counts.failed||0)+'\n';
   results += prometheus_prefix+'ddos_protect_controls{status="pending"} '+(counts.pending||0)+'\n';
+  if(prometheus_type) results += '# TYPE '+prometheus_prefix+'ddos_protect_connections_current gauge\n';
   results += prometheus_prefix+'ddos_protect_connections_current '+connections+'\n';
+  if(prometheus_type) results += '# TYPE '+prometheus_prefix+'ddos_protect_connections_configured gauge\n';
   results += prometheus_prefix+'ddos_protect_connections_configured '+routers.length+'\n';
   return results;
 }
