@@ -17,5 +17,5 @@ https://hub.docker.com/r/sflow/ddos-protect/
 
 Online help is available through web UI.
 
-For more information, visit:
+For documentation, tutorials, and community support, visit:
 https://sFlow-RT.com
